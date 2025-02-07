@@ -644,7 +644,7 @@ $$
    \text{MMD}(p,q) = || \mu_{p} - \mu_{q} ||_{\mathcal{H}},  
 $$
 
-where $\mu_{p}$ and $\mu_{q}$ are respectively the kernel mean embeddings of distributions $p$ and $q$ in a reproducible kernel Hilbert space (RKHS) $(\mathcal{H}, || \cdot ||_{\mathcal{H}})$, meaning : $\mu_{p}(\theta') = \mathbb{E}_{\theta \sim p }[K(\theta,\theta')] $ for all $\theta' \in \Theta$ and $K$ being the kernel. The MMD is used for instance in the context of two-sample tests @gretton_mmd, whose purpose is to compare distributions. We use in our computations the Gaussian or RBF kernel : 
+where $\mu_{p}$ and $\mu_{q}$ are respectively the kernel mean embeddings of distributions $p$ and $q$ in a reproducible kernel Hilbert space (RKHS) $(\mathcal{H}, || \cdot ||_{\mathcal{H}})$, meaning : $\mu_p(\theta') = \mathbb{E}_{\theta \sim p }[K(\theta,\theta')]$ for all $\theta' \in \Theta$ and $K$ being the kernel. The MMD is used for instance in the context of two-sample tests @gretton_mmd, whose purpose is to compare distributions. We use in our computations the Gaussian or RBF kernel : 
 $$
   K(\theta, \theta') = \exp(-0.5 \cdot ||\theta - \theta'||_2^2), 
 $$ 
@@ -846,9 +846,8 @@ $$
 
 where $\Phi$ is the cumulative distribution function of the standard Gaussian. The probit function is the inverse of $\Phi$. The likelihood is of the form : 
 $$
- \begin{cases}
+\begin{cases}
     L_N(\bX \, | \, \theta) = \displaystyle \prod_{i=1}^N p(a_i) \prod_{i=1}^N P_f(a_i)^{Z_i} (1-P_f(a_i))^{1-Z_i} \propto \prod_{i=1}^N  P_f(a_i)^{Z_i} (1-P_f(a_i))^{1-Z_i} \\
-    
     p(a_i) = \displaystyle \frac{1}{a_i \sqrt{2\pi \sigma^2_a}} \exp \left( - \frac{1}{2\sigma_a^2}(\log a_i - \mu_a)^2 \right).
 \end{cases}
 $$
@@ -856,17 +855,15 @@ $$
 For simplicity, we denote : $\gamma_i = \displaystyle  \frac{\log a_i - \log \theta_1}{\theta_2} = \Phi^{-1}(P_f(a_i)) = \text{probit}(P_f(a_i))$, the gradient of the log-likelihood is the following : 
 
 $$
-  \begin{cases}
+\begin{cases}
 \displaystyle \frac{\partial \log L_N}{\partial \theta_1}(\bX \,|\,\theta)  = \sum_{i=1}^N  \frac{1}{\theta_1 \theta_2} \left( (-Z_i)\frac{\Phi'(\gamma_i)}{\Phi(\gamma_i)} + (1-Z_i)\frac{\Phi'(\gamma_i)}{1-\Phi(\gamma_i)}  \right) \\
-
-
 \displaystyle \frac{\partial \log L_N}{\partial \theta_2}(\bX\,|\,\theta)  =   \sum_{i=1}^N \frac{\gamma_i}{\theta_2} \left( (-Z_i)\frac{\Phi'(\gamma_i)}{\Phi(\gamma_i)} + (1-Z_i)\frac{\Phi'(\gamma_i)}{1-\Phi(\gamma_i)}  \right). 
 \end{cases}
 $$
 
 There is no explicit formula for the MLE, so it has to be approximated using samples. This statistical model is a more difficult case than the previous one, since no explicit formula for the Jeffreys prior is available either but it has been shown by @van2024reference that it is improper in $\theta_2$ and some asymptotic rates where derived. More precisely, when $\theta_1 > 0$ is fixed,
 $$
-   \begin{cases} \displaystyle
+\begin{cases} \displaystyle
 J(\theta) \propto 1/\theta_2 \quad \text{as} \quad  \theta_2 \longrightarrow 0 \\
 J(\theta) \propto 1/\theta_2^3 \quad \text{as} \quad  \theta_2 \longrightarrow +\infty.
 \end{cases} 
