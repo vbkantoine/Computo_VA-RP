@@ -1,11 +1,3 @@
 project:
   type: website
   title: "VA-RP"
-
-format:
-  pdf:
-    documentclass: article
-    include-in-header:
-      text: |
-        \usepackage{amsmath}
-        \DeclareMathOperator*{\argmax}{arg\,max}
