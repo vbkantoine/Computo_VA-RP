@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Estimation of paramters in the probit model with an ‘exact’ Jeffreys – VA-RP</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-e5b8070214c8195f5f60c8866162d912.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-search-results"></div>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Estimation of paramters in the probit model with an ‘exact’ Jeffreys</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This script allows the conduction of <em>a posteriori</em> sampling of the paramter in the probit statistical model with a finely approximated Jeffreys prior.</p>
+<p>The derivation of the Jeffreys prior for the probit model is proposed in the repository <a href="https://github.com/vbkantoine/bayes_frag">bayes_frag</a>. That external code also allows to directly generate samples from the posterior yielded by that approximated Jeffreys prior.</p>
+<section id="clone-the-bayes_frag-github" class="level3">
+<h3 class="anchored" data-anchor-id="clone-the-bayes_frag-github">1. Clone the bayes_frag github</h3>
+<div id="8a9b9972" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. clone github bayes_frag</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">'bayes_frag'</span>) :</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">!</span>git clone <span class="st">"https://github.com/vbkantoine/bayes_frag.git"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sys.path.append(os.path.join(os.getcwd(),<span class="st">'bayes_frag'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cloning into 'bayes_frag'...
+remote: Enumerating objects: 74, done.
+remote: Counting objects: 100% (74/74), done.
+remote: Compressing objects: 100% (43/43), done.
+remote: Total 74 (delta 32), reused 64 (delta 22), pack-reused 0 (from 0)
+Receiving objects: 100% (74/74), 37.03 KiB | 7.41 MiB/s, done.
+Resolving deltas: 100% (32/32), done.</code></pre>
+</div>
+</div>
+</section>
+<section id="compute-the-jeffreys-prior-for-this-model" class="level3">
+<h3 class="anchored" data-anchor-id="compute-the-jeffreys-prior-for-this-model">2. Compute the Jeffreys prior for this model</h3>
+<p>We recall that the probit model is defined as a parametrized model where <span class="math inline">\(\theta=(\theta_1,\theta_2)\in(0,\infty)^2\)</span> is the parameter and the observed variable is <span class="math inline">\((Z,a)\)</span> where <span class="math display">\[\left\lbrace\begin{array}{l}a\sim\mathrm{Log-}\mathcal{N}(\mu_a,\sigma_a^2)\\
+Z\sim\mathrm{Bernoulli}(P_f(a))\end{array}\right.,\]</span> with <span class="math inline">\(P_f(a)=\Phi\left(\frac{\log a-\log\theta_1}{\theta_2}\right)\)</span>, and <span class="math inline">\(\Phi\)</span> denoting the c.d.f. of a standard Gaussian.</p>
+<p>The Jeffreys prior of this model depends on the distribution of <span class="math inline">\(a\)</span>, i.e.&nbsp;it depends on <span class="math inline">\(\mu_a\)</span> and <span class="math inline">\(\sigma_a\)</span>.</p>
+<p>That external repository proposes a code to compute the Jeffreys prior given a distribution of <span class="math inline">\(a\)</span>. Actually, it derives a fine numerical approximation of the Fisher information matrix that is stored in a file called <code>fisher</code>.</p>
+<p>The exection of that code is generally very long given the complex expression of the Fisher information matrix. For this reason, we suggest to download the one that we have already computed and that we provide online on <a href="https://osf.io/gvqw4/files/osfstorage/678a826e9b2975f377dd6f3f">OSF</a>. The dowloaded file <code>fisher</code> can be placed at the root of the current directory.</p>
+<p>We also have provided a lighter approximation of the Fisher information matrix based on a less thin derivation. It is stored in the file called <code>fisher_light</code>, that can be renamed by <code>fisher</code> to be used.</p>
+<p>If one wants to do the computations instead of downloading the <code>fisher</code> file or renaming the <code>fisher_light</code>file, the last line of the following cell must be uncommented.</p>
+<div id="8d7d62f6" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. compute and save a fine mesh of Jeffreys prior</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> util.create_fisher_artificial <span class="im">as</span> cfa</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dat <span class="op">=</span> cfa.Data_simplified_big()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save_fisher_computation():</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    save_fisher_arr <span class="op">=</span> cfa.dict_save_fisher[<span class="st">'save_fisher_arr'</span>] </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># selecting the dictionnary cfa.dict_save_fisher2 above lead to a lighter appproximation of Fisher </span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (the one that we have provided and called `fisher_light`)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    alpha_min <span class="op">=</span> save_fisher_arr.alpha_min</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    alpha_max <span class="op">=</span> save_fisher_arr.alpha_max</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    beta_min <span class="op">=</span> save_fisher_arr.beta_min</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    beta_max <span class="op">=</span> save_fisher_arr.beta_max</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    num <span class="op">=</span> save_fisher_arr.num_alpha</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    theta_tab1 <span class="op">=</span> save_fisher_arr.alpha_tab</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    theta_tab2 <span class="op">=</span> save_fisher_arr.beta_tab</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    function <span class="op">=</span> cfa.fisher.fisher_function(<span class="st">"simpson"</span>, dat)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    I <span class="op">=</span> cfa.save_fisher(cfa.save_path, function, theta_tab1, theta_tab2)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co"># # save_fisher_computation()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="conduction-of-a-posteriori-sampling" class="level3">
+<h3 class="anchored" data-anchor-id="conduction-of-a-posteriori-sampling">3. Conduction of <em>a posteriori</em> sampling</h3>
+<p>In the following, we import data from the file <code>../tirages_data</code> to derive a posterior that is used to generate samples of the paramter <span class="math inline">\(\theta\)</span>. Then, the results are saved on different files according to the prior: Jeffreys or the constrained Jeffreys.</p>
+<div id="5db81e30" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pickle</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numba <span class="im">import</span> jit</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag <span class="im">import</span> stat_functions <span class="im">as</span> stat_f</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag.data <span class="im">import</span> Data</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag.model <span class="im">import</span> Model</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag <span class="im">import</span> config</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag.reference_curves <span class="im">import</span> Reference_known_MLE</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bayes_frag.extract_saved_fisher <span class="im">import</span> Approx_fisher</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> util.create_fisher_artificial <span class="im">import</span> dict_save_fisher</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="440fcafd" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Data_simplified(Data) :</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">       This class serves the import of data contained in an external file </span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, i, pickle_path):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">            i (int): in the generated array, id to take into account in this run</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">file</span> <span class="op">=</span> <span class="bu">open</span>(pickle_path, mode<span class="op">=</span><span class="st">'rb'</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        array_A_Z <span class="op">=</span> pickle.load(<span class="bu">file</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.A <span class="op">=</span> np.array(array_A_Z[<span class="dv">0</span>][:,i,np.newaxis], dtype<span class="op">=</span>np.<span class="bu">float</span>, order<span class="op">=</span><span class="st">'C'</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Z <span class="op">=</span> np.array(array_A_Z[<span class="dv">1</span>][:,i,np.newaxis], dtype<span class="op">=</span>np.<span class="bu">float</span>, order<span class="op">=</span><span class="st">"C"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Y <span class="op">=</span> np.ones_like(<span class="va">self</span>.A)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a_tab <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.h_a <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._set_a_tab()</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.f_A <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.f_A_tab <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._compute_f_A()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.increasing_mode <span class="op">=</span> <span class="va">True</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="dba1a7e0" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>kappa <span class="op">=</span> <span class="dv">1</span><span class="op">/</span><span class="dv">8</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>alpha <span class="op">=</span> <span class="dv">1</span><span class="op">/</span><span class="dv">2</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>gamma <span class="op">=</span> kappa<span class="op">/</span>alpha</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>save_folder <span class="op">=</span> <span class="st">'./'</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>path_tirages_data <span class="op">=</span> <span class="st">'../tirages_probit/'</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>theta_vrai <span class="op">=</span> np.array([<span class="fl">3.37610525</span>, <span class="fl">0.43304097</span>])</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> experiment(N) :</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    init_seed <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    SEED <span class="op">=</span> init_seed <span class="op">+</span> <span class="bu">int</span>(N)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    os.environ[<span class="st">'PYTHONHASHSEED'</span>] <span class="op">=</span> <span class="bu">str</span>(SEED)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    np.random.seed(SEED)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="kw">not</span> os.path.exists(os.path.join(save_folder, <span class="st">'model_J_constraint_</span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(N<span class="op">-</span><span class="dv">1</span>))), <span class="st">'existing run no </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(N)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    i_data <span class="op">=</span> N<span class="op">-</span><span class="dv">1</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> Data_simplified(i_data, os.path.join(path_tirages_data, <span class="st">'tirages_data'</span>))</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">#&nbsp;print(data.A.shape)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">#&nbsp;print(data.Z)</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    error_draw <span class="op">=</span> np.arange(<span class="dv">1</span>,<span class="dv">41</span>)<span class="op">*</span><span class="dv">5</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    n_est <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">##</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># parameters models</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    linear <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    approx_fisher_class <span class="op">=</span> Approx_fisher(dict_save_fisher[<span class="st">'save_fisher_path'</span>], dict_save_fisher[<span class="st">'save_fisher_arr'</span>], fisher_file_path_is_personalized<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    fisher <span class="op">=</span>  approx_fisher_class.fisher_approx</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    likelihood <span class="op">=</span> stat_f.log_vrais</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    iter_HM <span class="op">=</span> <span class="dv">15000</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    sigma_prop <span class="op">=</span> np.array([[<span class="fl">0.1</span>,<span class="dv">0</span>],[<span class="dv">0</span>,<span class="fl">0.095</span>]])</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    t0 <span class="op">=</span> np.array([<span class="dv">3</span>,<span class="fl">0.3</span>])</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    HM_fun <span class="op">=</span> stat_f.adaptative_HM</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">@jit</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> prior(th) :</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        I <span class="op">=</span> fisher(th)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span><span class="op">/</span><span class="dv">2</span> <span class="op">*</span> np.log(np.nan_to_num(np.<span class="bu">abs</span>(I[:,<span class="dv">0</span>,<span class="dv">0</span>]<span class="op">*</span>I[:,<span class="dv">1</span>,<span class="dv">1</span>]<span class="op">-</span>I[:,<span class="dv">0</span>,<span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>)))</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># log_post for this case :</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">@jit</span>(nopython<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> log_post(z,a, theta) :</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> stat_f.log_post_jeff_adapt(theta,z,a, Fisher<span class="op">=</span>fisher)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">@jit</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> prior_adapted(th) :</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> prior(th) <span class="op">+</span> gamma <span class="op">*</span> np.log(th[:,<span class="dv">1</span>]<span class="op">*</span>th[:,<span class="dv">1</span>])</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">@jit</span>(nopython<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> log_post_adapted(z,a,theta) :</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> log_post(z,a,theta) <span class="op">+</span> gamma<span class="op">*</span>np.log(theta[:,<span class="dv">1</span>])</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    ref <span class="op">=</span> Reference_known_MLE(data, theta_vrai)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    HM_post_simul_constraint <span class="op">=</span> stat_f.Post_HM_Estimator(HM_fun, t0, log_post_adapted, pi_log<span class="op">=</span><span class="va">True</span>, max_iter<span class="op">=</span>iter_HM, sigma0<span class="op">=</span>sigma_prop)</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    model_J_constraint <span class="op">=</span> Model(prior_adapted, likelihood, data, HM_post_simul_constraint, linear<span class="op">=</span>linear, ref<span class="op">=</span>ref)</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    HM_post_simul <span class="op">=</span> stat_f.Post_HM_Estimator(HM_fun, t0, log_post, pi_log<span class="op">=</span><span class="va">True</span>, max_iter<span class="op">=</span>iter_HM, sigma0<span class="op">=</span>sigma_prop)</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>    model_J <span class="op">=</span> Model(prior, likelihood, data, HM_post_simul, linear<span class="op">=</span>linear, ref<span class="op">=</span>ref)</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    <span class="co">## run everything</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    model_J_constraint.run_simulations(error_draw, n_est, sim<span class="op">=</span>[<span class="st">'post'</span>], print_fo<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    model_J.run_simulations(error_draw, n_est, sim<span class="op">=</span>[<span class="st">'post'</span>], print_fo<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    pickle.dump({<span class="st">'logs'</span>: model_J_constraint.logs, <span class="st">'A'</span>:model_J_constraint.A, <span class="st">'S'</span>:model_J_constraint.S, <span class="st">'seed'</span>:SEED}, <span class="bu">open</span>(os.path.join(save_folder, <span class="st">"model_J_constraint_</span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(i_data)), <span class="st">"wb"</span>))</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    pickle.dump({<span class="st">'logs'</span>: model_J.logs, <span class="st">'A'</span>:model_J.A, <span class="st">'S'</span>:model_J.S, <span class="st">'seed'</span>:SEED}, <span class="bu">open</span>(os.path.join(save_folder, <span class="st">"model_J_</span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(i_data)), <span class="st">"wb"</span>))</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The above function can be ran several time to get samples given different samples of the data. The following permits to conduct <span class="math inline">\(10\)</span> oh these experiments. It re-generates the files <code>model_J_*</code> that are provided in the directory. We warn the user that this execution can take a long time.</p>
+<div id="1a3c60b3" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. (long code) all the following run section 3. for 10 different seeds</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> N <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>,<span class="dv">11</span>) :</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'****** Experiment no </span><span class="sc">{}</span><span class="st">/10 ******'</span>.<span class="bu">format</span>(N))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    experiment(N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>****** Experiment no 1/10 ******
+Simulation 1/40, dataset_size=5, simulating ['post']</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/q2/pg0k5xqs0r9brvk6cxh1hb_m0000gn/T/ipykernel_16765/3424857049.py:12: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  self.A = np.array(array_A_Z[0][:,i,np.newaxis], dtype=np.float, order='C')
+/var/folders/q2/pg0k5xqs0r9brvk6cxh1hb_m0000gn/T/ipykernel_16765/3424857049.py:13: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  self.Z = np.array(array_A_Z[1][:,i,np.newaxis], dtype=np.float, order="C")
+/Users/antoinevanbiesbroeck/Documents/code computo merged/bayes_frag/bayes_frag/stat_functions.py:213: NumbaWarning: Cannot cache compiled function "fisher_approx" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  pi_zv = pi(z_v)
+/Users/antoinevanbiesbroeck/Documents/code computo merged/bayes_frag/bayes_frag/stat_functions.py:213: NumbaWarning: Cannot cache compiled function "log_post_jeff_adapt" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  pi_zv = pi(z_v)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simulation 2/40, dataset_size=10, simulating ['post']
+Simulation 3/40, dataset_size=15, simulating ['post']
+Simulation 4/40, dataset_size=20, simulating ['post']
+Simulation 5/40, dataset_size=25, simulating ['post']
+Simulation 6/40, dataset_size=30, simulating ['post']
+Simulation 7/40, dataset_size=35, simulating ['post']
+Simulation 8/40, dataset_size=40, simulating ['post']
+Simulation 9/40, dataset_size=45, simulating ['post']
+Simulation 10/40, dataset_size=50, simulating ['post']
+Simulation 11/40, dataset_size=55, simulating ['post']
+Simulation 12/40, dataset_size=60, simulating ['post']
+Simulation 13/40, dataset_size=65, simulating ['post']
+Simulation 14/40, dataset_size=70, simulating ['post']
+Simulation 15/40, dataset_size=75, simulating ['post']
+Simulation 16/40, dataset_size=80, simulating ['post']
+Simulation 17/40, dataset_size=85, simulating ['post']
+Simulation 18/40, dataset_size=90, simulating ['post']
+Simulation 19/40, dataset_size=95, simulating ['post']
+Simulation 20/40, dataset_size=100, simulating ['post']
+Simulation 21/40, dataset_size=105, simulating ['post']
+Simulation 22/40, dataset_size=110, simulating ['post']
+Simulation 23/40, dataset_size=115, simulating ['post']
+Simulation 24/40, dataset_size=120, simulating ['post']
+Simulation 25/40, dataset_size=125, simulating ['post']
+Simulation 26/40, dataset_size=130, simulating ['post']
+Simulation 27/40, dataset_size=135, simulating ['post']
+Simulation 28/40, dataset_size=140, simulating ['post']
+Simulation 29/40, dataset_size=145, simulating ['post']
+Simulation 30/40, dataset_size=150, simulating ['post']
+Simulation 31/40, dataset_size=155, simulating ['post']
+Simulation 32/40, dataset_size=160, simulating ['post']
+Simulation 33/40, dataset_size=165, simulating ['post']
+Simulation 34/40, dataset_size=170, simulating ['post']
+Simulation 35/40, dataset_size=175, simulating ['post']
+Simulation 36/40, dataset_size=180, simulating ['post']
+Simulation 37/40, dataset_size=185, simulating ['post']
+Simulation 38/40, dataset_size=190, simulating ['post']
+Simulation 39/40, dataset_size=195, simulating ['post']
+Simulation 40/40, dataset_size=200, simulating ['post']
+Simulation 1/40, dataset_size=5, simulating ['post']
+Simulation 2/40, dataset_size=10, simulating ['post']
+Simulation 3/40, dataset_size=15, simulating ['post']
+Simulation 4/40, dataset_size=20, simulating ['post']
+Simulation 5/40, dataset_size=25, simulating ['post']
+Simulation 6/40, dataset_size=30, simulating ['post']
+Simulation 7/40, dataset_size=35, simulating ['post']
+Simulation 8/40, dataset_size=40, simulating ['post']
+Simulation 9/40, dataset_size=45, simulating ['post']
+Simulation 10/40, dataset_size=50, simulating ['post']
+Simulation 11/40, dataset_size=55, simulating ['post']
+Simulation 12/40, dataset_size=60, simulating ['post']
+Simulation 13/40, dataset_size=65, simulating ['post']
+Simulation 14/40, dataset_size=70, simulating ['post']
+Simulation 15/40, dataset_size=75, simulating ['post']
+Simulation 16/40, dataset_size=80, simulating ['post']
+Simulation 17/40, dataset_size=85, simulating ['post']
+Simulation 18/40, dataset_size=90, simulating ['post']
+Simulation 19/40, dataset_size=95, simulating ['post']
+Simulation 20/40, dataset_size=100, simulating ['post']
+Simulation 21/40, dataset_size=105, simulating ['post']
+Simulation 22/40, dataset_size=110, simulating ['post']
+Simulation 23/40, dataset_size=115, simulating ['post']
+Simulation 24/40, dataset_size=120, simulating ['post']
+Simulation 25/40, dataset_size=125, simulating ['post']
+Simulation 26/40, dataset_size=130, simulating ['post']
+Simulation 27/40, dataset_size=135, simulating ['post']
+Simulation 28/40, dataset_size=140, simulating ['post']
+Simulation 29/40, dataset_size=145, simulating ['post']
+Simulation 30/40, dataset_size=150, simulating ['post']
+Simulation 31/40, dataset_size=155, simulating ['post']
+Simulation 32/40, dataset_size=160, simulating ['post']
+Simulation 33/40, dataset_size=165, simulating ['post']
+Simulation 34/40, dataset_size=170, simulating ['post']
+Simulation 35/40, dataset_size=175, simulating ['post']
+Simulation 36/40, dataset_size=180, simulating ['post']
+Simulation 37/40, dataset_size=185, simulating ['post']
+Simulation 38/40, dataset_size=190, simulating ['post']
+Simulation 39/40, dataset_size=195, simulating ['post']
+Simulation 40/40, dataset_size=200, simulating ['post']
+****** Experiment no 2/10 ******
+Simulation 1/40, dataset_size=5, simulating ['post']</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/q2/pg0k5xqs0r9brvk6cxh1hb_m0000gn/T/ipykernel_16765/3424857049.py:12: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  self.A = np.array(array_A_Z[0][:,i,np.newaxis], dtype=np.float, order='C')
+/var/folders/q2/pg0k5xqs0r9brvk6cxh1hb_m0000gn/T/ipykernel_16765/3424857049.py:13: DeprecationWarning: `np.float` is a deprecated alias for the builtin `float`. To silence this warning, use `float` by itself. Doing this will not modify any behavior and is safe. If you specifically wanted the numpy scalar type, use `np.float64` here.
+Deprecated in NumPy 1.20; for more details and guidance: https://numpy.org/devdocs/release/1.20.0-notes.html#deprecations
+  self.Z = np.array(array_A_Z[1][:,i,np.newaxis], dtype=np.float, order="C")
+/Users/antoinevanbiesbroeck/Documents/code computo merged/bayes_frag/bayes_frag/stat_functions.py:213: NumbaWarning: Cannot cache compiled function "fisher_approx" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  pi_zv = pi(z_v)
+/Users/antoinevanbiesbroeck/Documents/code computo merged/bayes_frag/bayes_frag/stat_functions.py:213: NumbaWarning: Cannot cache compiled function "log_post_jeff_adapt" as it uses dynamic globals (such as ctypes pointers and large global arrays)
+  pi_zv = pi(z_v)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simulation 2/40, dataset_size=10, simulating ['post']
+Simulation 3/40, dataset_size=15, simulating ['post']
+Simulation 4/40, dataset_size=20, simulating ['post']
+Simulation 5/40, dataset_size=25, simulating ['post']
+Simulation 6/40, dataset_size=30, simulating ['post']
+Simulation 7/40, dataset_size=35, simulating ['post']
+Simulation 8/40, dataset_size=40, simulating ['post']
+Simulation 9/40, dataset_size=45, simulating ['post']
+Simulation 10/40, dataset_size=50, simulating ['post']</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/NilsBaillie\.github\.io\/Computo_VA-RP\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
