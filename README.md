@@ -16,14 +16,21 @@ The derivation of the Jeffreys prior is conducted via numerical integrations; an
 For reproducibility, the python file `probit_runs_with_Jeffreys.py` proposed in the same folder allows to re-generate the results. Since the presence of this file lead to a failure of the build, here are 
 its contents : 
 
+```python
+# %% [markdown]
+# # Estimation of parameters in the probit model with an 'exact' Jeffreys
+# 
+# This script allows the conduction of *a posteriori* sampling of the paramter in the probit statistical model with a finely approximated Jeffreys prior.
+# 
+# 
+# The derivation of the Jeffreys prior for the probit model is proposed in the repository [bayes_frag](https://github.com/vbkantoine/bayes_frag). That external code also allows to directly generate samples from the posterior yielded by that approximated Jeffreys prior.
+# 
 
-Estimation of parameters in the probit model with an 'exact' Jeffreys
+# %% [markdown]
+# ### 1. Clone the bayes_frag github
 
-This script allows the conduction of *a posteriori* sampling of the paramter in the probit statistical model with a finely approximated Jeffreys prior.
-The derivation of the Jeffreys prior for the probit model is proposed in the repository [bayes_frag](https://github.com/vbkantoine/bayes_frag). That external code also allows to directly generate samples from the posterior yielded by that approximated Jeffreys prior.
-
-1. Clone the bayes_frag github
-1. clone github bayes_frag
+# %%
+# 1. clone github bayes_frag
 
 import os
 import sys
@@ -33,25 +40,28 @@ if not os.path.exists('bayes_frag') :
 
 sys.path.append(os.path.join(os.getcwd(),'bayes_frag'))
 
-2. Compute the Jeffreys prior for this model
- 
-We recall that the probit model is defined as a parametrized model where $\theta=(\theta_1,\theta_2)\in(0,\infty)^2$ is the parameter and the observed variable is $(Z,a)$ where 
-$$\left\lbrace\begin{array}{l}a\sim\mathrm{Log-}\mathcal{N}(\mu_a,\sigma_a^2)\\
-Z\sim\mathrm{Bernoulli}(P_f(a))\end{array}\right.,$$
-with $P_f(a)=\Phi\left(\frac{\log a-\log\theta_1}{\theta_2}\right)$, and $\Phi$ denoting the c.d.f. of a standard Gaussian.
- 
-The Jeffreys prior of this model depends on the distribution of $a$, i.e. it depends on $\mu_a$ and $\sigma_a$.
+# %% [markdown]
+# ### 2. Compute the Jeffreys prior for this model
+# 
+# We recall that the probit model is defined as a parametrized model where $\theta=(\theta_1,\theta_2)\in(0,\infty)^2$ is the parameter and the observed variable is $(Z,a)$ where 
+# $$\left\lbrace\begin{array}{l}a\sim\mathrm{Log-}\mathcal{N}(\mu_a,\sigma_a^2)\\
+# Z\sim\mathrm{Bernoulli}(P_f(a))\end{array}\right.,$$
+# with $P_f(a)=\Phi\left(\frac{\log a-\log\theta_1}{\theta_2}\right)$, and $\Phi$ denoting the c.d.f. of a standard Gaussian.
+# 
+# The Jeffreys prior of this model depends on the distribution of $a$, i.e. it depends on $\mu_a$ and $\sigma_a$.
+# 
+# That external repository proposes a code to compute the Jeffreys prior given a distribution of $a$. Actually, it derives a fine numerical approximation of the Fisher information matrix that is stored in a file called `fisher`.
+# 
+# The exection of that code is generally very long given the complex expression of the Fisher information matrix.
+# For this reason, we suggest to download the one that we have already computed and that we provide online on [OSF](https://osf.io/gvqw4/files/osfstorage/678a826e9b2975f377dd6f3f). The dowloaded file `fisher` can be placed at the root of the current directory.
+# 
+# We also have provided a lighter approximation of the Fisher information matrix based on a less thin derivation. It is stored in the file called `fisher_light`, that can be renamed by `fisher` to be used. 
+# 
+# If one wants to do the computations instead of downloading the `fisher` file or renaming the `fisher_light`file, the last line of the following cell must be uncommented. 
+# 
 
-That external repository proposes a code to compute the Jeffreys prior given a distribution of $a$. Actually, it derives a fine numerical approximation of the Fisher information matrix that is stored in a file called `fisher`.
-
-The exection of that code is generally very long given the complex expression of the Fisher information matrix.
-For this reason, we suggest to download the one that we have already computed and that we provide online on [OSF](https://osf.io/gvqw4/files/osfstorage/678a826e9b2975f377dd6f3f). The dowloaded file `fisher` can be placed at the root of the current directory.
-
-We also have provided a lighter approximation of the Fisher information matrix based on a less thin derivation. It is stored in the file called `fisher_light`, that can be renamed by `fisher` to be used. 
-
-If one wants to do the computations instead of downloading the `fisher` file or renaming the `fisher_light`file, the last line of the following cell must be uncommented. 
- 
-2. compute and save a fine mesh of Jeffreys prior
+# %%
+# 2. compute and save a fine mesh of Jeffreys prior
 
 import util.create_fisher_artificial as cfa
 
@@ -74,14 +84,18 @@ def save_fisher_computation():
     function = cfa.fisher.fisher_function("simpson", dat)
     I = cfa.save_fisher(cfa.save_path, function, theta_tab1, theta_tab2)
     
-save_fisher_computation()
+# # save_fisher_computation()
 
 
-3. Conduction of *a posteriori* sampling
+# %% [markdown]
+# ### 3. Conduction of *a posteriori* sampling
+# 
+# In the following, we import data from the file `../tirages_data` to derive a posterior that is used to generate samples of the parameter $\theta$.
+# Then, the results are saved on different files according to the prior: Jeffreys or the constrained Jeffreys.
+# 
+# 
 
-In the following, we import data from the file `../tirages_data` to derive a posterior that is used to generate samples of the parameter $\theta$.
-Then, the results are saved on different files according to the prior: Jeffreys or the constrained Jeffreys.
-
+# %%
 import os
 import numpy as np
 import pickle
@@ -96,6 +110,7 @@ from bayes_frag.extract_saved_fisher import Approx_fisher
 
 from util.create_fisher_artificial import dict_save_fisher
 
+# %%
 class Data_simplified(Data) :
     """
        This class serves the import of data contained in an external file 
@@ -117,6 +132,8 @@ class Data_simplified(Data) :
         self.f_A_tab = None
         self._compute_f_A()
         self.increasing_mode = True
+
+# %%
 
 kappa = 1/8
 alpha = 1/2
@@ -192,12 +209,23 @@ def experiment(N) :
     pickle.dump({'logs': model_J_constraint.logs, 'A':model_J_constraint.A, 'S':model_J_constraint.S, 'seed':SEED}, open(os.path.join(save_folder, "model_J_constraint_{}".format(i_data)), "wb"))
     pickle.dump({'logs': model_J.logs, 'A':model_J.A, 'S':model_J.S, 'seed':SEED}, open(os.path.join(save_folder, "model_J_{}".format(i_data)), "wb"))
 
-The above function can be ran several time to get samples given different samples of the data.
-The following permits to conduct $10$ of these experiments. 
-It re-generates the files `model_J_*` that are provided in the directory.
-We warn the user that this execution can take a long time.
 
-4. (long code) all the following run section 3. for 10 different seeds
+
+
+# %% [markdown]
+# The above function can be ran several time to get samples given different samples of the data.
+# The following permits to conduct $10$ of these experiments. 
+# It re-generates the files `model_J_*` that are provided in the directory.
+# We warn the user that this execution can take a long time.
+
+# %%
+# 4. (long code) all the following run section 3. for 10 different seeds
 for N in range(1,11) :
     print('****** Experiment no {}/10 ******'.format(N))
     experiment(N)
+
+# %%
+
+
+
+```
