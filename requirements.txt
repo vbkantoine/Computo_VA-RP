@@ -1,8 +1,8 @@
 jupyter
-numpy
 matplotlib
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch
+numpy
 tqdm
 scipy
 numba
