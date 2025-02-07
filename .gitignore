@@ -13,3 +13,5 @@ _extensions/
 *.aux
 *.log
 *.toc
+# Jupyter notebook
+*.ipynb
