@@ -13,4 +13,4 @@ with
 We rely, for the computation of these estimates, on the code provided in the repository [bayes_frag](https://github.com/vbkantoine/bayes_frag).
 The derivation of the Jeffreys prior is conducted via numerical integrations; and the generation of *a posteriori* estimates is done thanks to a Metropolis Hasting algorithm.
 
-For reproducibility, the jupyter notebook `probit_runs_with_Jeffreys.ipynb` proposed in the same folder allows to re-generate the results.
+For reproducibility, the python file `probit_runs_with_Jeffreys.py` proposed in the same folder allows to re-generate the results.
