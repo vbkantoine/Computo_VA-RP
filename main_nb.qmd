@@ -34,6 +34,7 @@ published: false # will be set to true once accepted
 format:
   computo-html: default
   computo-pdf: default
+
 jupyter: python3
 
 ---
@@ -123,16 +124,16 @@ The reference prior theory fits into the usual framework of statistical inferenc
 The situation is the following: we observe i.i.d data samples $\bX = (X_1,..., X_N) \in \mathcal{X}^N$ with $\mathcal{X} \subset \mathbb{R}^d$. We suppose that the likelihood function $L_N(\mathbf{X} \, | \, \theta) = \prod_{i=1}^N L(X_i \, | \, \theta)$ is known and $\theta \in \Theta \subset \mathbb{R}^q$ is the parameter we want to infer. Since we use the Bayesian framework, $\theta$ is considered to be a random variable with a prior distribution $\pi$. We also define the marginal likelihood $p_{\pi, N}(\bX) = \int_{\Theta}\pi(\theta)L_N(\bX \, | \, \theta)d\theta$ associated to the marginal probability measure $\mathbb{P}_{\pi, N}$. The non-asymptotic RP, first introduced in @Bernardo1979a and formalized in @berger2009formal, is defined to be one of the priors verifying:
 
 $$
-    \pi^\ast \in \argmax_{\pi \in \mathcal{P}} I(\pi; L_N) \ ,
+    \pi^\ast \in \underset{\pi \in \mathcal{P}}{\operatorname{argmax}} \, I(\pi; L_N) \ ,
 $$ {#eq-RPdef}
 where $\mathcal{P}$ is a class of admissible probability distributions and  $I(\pi; L_N)$ is the mutual information for the prior $\pi$ and the likelihood $L_N$ between the random variable of the parameters $\theta \sim \pi$ and the random variable of the data $\bX \sim \mathbb{P}_{\pi, N}$: 
 $$
     I(\pi; L_N) = \int_{\mathcal{X}^N}{\rm KL}(\pi(\cdot \,|\, \bX) \, || \,  \pi) p_{\pi,N}(\bX)d\bX
 $$ {#eq-mutualinfoberger}
 Hence, $\pi^\ast$ is a prior that maximizes the Kullback-Leibler divergence between itself and its posterior averaged by the marginal distribution of datasets. The Kullback-Leibler divergence between two probability measures of density $p$ and $q$ defined on a generic set $\Omega$ writes:
-\begin{equation*}
+$$
     {\rm KL}(p\,||\,q) = \int_\Omega \log\left(\frac{p(\omega)}{q(\omega)}\right) p(\omega)d\omega.
-\end{equation*}
+$$
 Thus, $\pi^\ast$ is the prior that maximises the influence of the data on the posterior distribution, justifying its reference (or objective) properties. The RP $\pi^\ast$ can also be interpreted using channel coding and information theory @MacKay2003 (chapter 9). Indeed, remark that $I(\pi; L_N)$ corresponds to the mutual information $I(\theta, \bX)$ between the random variable $\theta \sim \pi$ and the data $\bX \sim \mathbb{P}_{\pi, N}$, it measures the information that conveys the data $\bX$ about the parameters $\theta$. The maximal value of this mutual information is defined as the channel's capacity. The RP thus corresponds to the prior distribution that maximizes the information about $\theta$ conveyed by the data $\bX$. 
 
 Using Fubini's theorem and Bayes' theorem, we can derive an alternative and more practical expression for the mutual information : 
@@ -172,7 +173,7 @@ Technically, the formal RP is constructed such that its projection on every comp
 
 In our algorithm we consider probability distributions defined on the space $\Theta$ and not on sequences of subsets. A consequence of this statement is that our algorithm may tend to approximate improper priors in some cases. Indeed, any given sample by our algorithm results, by construction, from a proper distribution, which is expected to be a good approximation of the solution of the optimization problem expressed in @eq-RPdef. If $N$ is large enough, the latter should be close to the  ---potentially improper--- theoretical RP. This approach is justified to some extent since in the context of Q-vague convergence defined in @Bioche2016 for instance, improper priors can be the limit of sequences of proper priors. Although this theoretical notion of convergence is defined, no concrete metric is given, making quantification of the difference between proper and improper priors infeasible in practice. Furthermore, as mentioned in the introduction, improper priors can also compromise the validity of {a posteriori} estimates in some cases. To address this issue, we adapted our algorithm to handle the developments made in @van2024constr, which suggest a method to define proper RPs by simply resolving a constrained version of the initial optimization problem:
 $$
-    \tilde\pi^* \in \argmax_{\substack{\pi \, \text{prior}\\ \text{s.t.}\,\mathcal{C}(\pi)<\infty}} I_{\rD_{f_\alpha}}(\pi; L_N),
+    \tilde\pi^* \in \underset{\substack{\pi \, \text{prior}\\ \text{s.t.}\,\mathcal{C}(\pi)<\infty}}{\operatorname{argmax}} I_{\rD_{f_\alpha}}(\pi; L_N),
 $$ {#eq-def_const_RP}
 where $\mathcal{C}(\pi)$ defines a constraint of the form $\int_\Theta a(\theta)\pi(\theta)d\theta$, $a$ being a positive function. When the mutual information in the above optimization problem is defined from an $\alpha$-divergence, and when $a$ verifies
 $$
@@ -194,7 +195,7 @@ which is proper.
 Variational inference refers to techniques that aim to approximate a probability distribution by solving an optimization problem ---that often takes a variational form, such as maximizing evidence lower bound (ELBO) @Kingma2014.
 It is thus relevant to consider them for approximating RPs, as the goal is to maximize, w.r.t. the prior,  the mutual information defined in @eq-mutualinfo. 
 
-We restrict the set of priors to a parametric space $\{\pi_\lambda,\,\lambda\in\Lambda\}$, $\Lambda\subset\mathbb{R}^L$, reducing the original optimization problem into a finite-dimensional one. The optimization problem in @eq-RPdef or @eq-def_const_RP becomes finding $\argmax_{\lambda\in\Lambda}I_{\rD_f}(\pi_\lambda; L_N)$.
+We restrict the set of priors to a parametric space $\{\pi_\lambda,\,\lambda\in\Lambda\}$, $\Lambda\subset\mathbb{R}^L$, reducing the original optimization problem into a finite-dimensional one. The optimization problem in @eq-RPdef or @eq-def_const_RP becomes finding $\underset{\lambda\in\Lambda}{\operatorname{argmax}} \, I_{\rD_f}(\pi_\lambda; L_N)$.
 Our approach is to define the set of priors $\pi_\lambda$ implicitly, as in @gauchy_var_rp:
 $$
 \theta \sim \pi_{\lambda} \iff \theta = g(\lambda,\varepsilon) \quad \text{and} \quad \varepsilon \sim \mathbb{P}_{\varepsilon}.
@@ -219,7 +220,7 @@ The choice of the neural network is up to the user, we will showcase in our nume
 
 The VA-RP is formulated as the solution to the following optimization problem:
 $$
-    \pi_{\lambda^\ast}=\argmax_{\lambda\in\Lambda} \mathcal{O}_{\rD_f}(\pi; L_N),
+    \pi_{\lambda^\ast}=\underset{\lambda\in\Lambda}{\operatorname{argmax}} \, \mathcal{O}_{\rD_f}(\pi; L_N),
 $$ {#eq-opti_pb_pilambda}
 where $\pi_\lambda$ is parameterized through the relation between a latent variable $\varepsilon$ and  the parameter $\theta$, as outlined in the preceding Section. The function $\mathcal{O}_{\rD_f}$ is called the objective function, it is maximized using  stochastic gradient optimization, following the approach described in @gauchy_var_rp.
 
@@ -316,7 +317,7 @@ $$
 with $a_k$ : $\Theta \mapsto \mathbb{R}^+$ integrable and linearly independent functions, and $b_k \in \mathbb{R}$. We then adapt the optimization problem in @eq-opti_pb_pilambda to propose the following constrained optimization problem:
 $$
 \begin{align*}
-& \pi^C_{\lambda^\ast} \in \argmax_{\lambda \in \Lambda} \, \mathcal{O}_{\rD_f}(\pi_{\lambda}; L_N) \\
+& \pi^C_{\lambda^\ast} \in \underset{\lambda \in \Lambda}{\operatorname{argmax}} \, \mathcal{O}_{\rD_f}(\pi_{\lambda}; L_N) \\
 & \text{subject to} \quad \forall \,k \in \{1, \ldots, K\}, \, \,   \, \mathcal{C}_k(\pi_{\lambda}) = 0,
 \end{align*}
 $$
@@ -387,7 +388,7 @@ $$
 In practice, the augmented Lagrangian algorithm is of the form: 
 $$
    \begin{cases}
-    \lambda^{t+1} = \argmax_{\lambda} \mathcal{L}_A(\lambda, \eta^t, \tilde{\eta}) \\
+    \lambda^{t+1} = \underset{\lambda}{\operatorname{argmax}} \, \mathcal{L}_A(\lambda, \eta^t, \tilde{\eta}) \\
     \forall k \in \{1, \ldots, K\}, \, \eta_k^{t+1} = \eta_k^t - \tilde{\eta}_k\cdot \mathcal{C}_k(\pi_{\lambda^{t+1}}).
 \end{cases}
 $$
