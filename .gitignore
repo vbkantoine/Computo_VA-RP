@@ -13,4 +13,3 @@ _extensions/
 *.aux
 *.log
 *.toc
-**/*.ipynb
