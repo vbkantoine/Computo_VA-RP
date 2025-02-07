@@ -1020,7 +1020,7 @@ plt.show()
 In @fig-probit_mi is shown the evolution of the mutual information through the optimization of the VA-RP for the probit model. 
 We perceive high mutual information values at the initialization, which we interpret as a result of the fact that the parametric prior on $\theta_1$ is already quite close to its target distribution.
 
-With $\alpha$-divergences, using a moment constraint of the form $a(\theta_2) =\theta_2^{\kappa}$ for the second component is relevant here as long as $ \kappa \in \left(0, \frac{2}{1+1/\alpha}\right)$, to ensure that the resulting constrained prior is indeed proper. With $\alpha=0.5$, we take the value $\kappa=1/8$ and we use the same neural network.
+With $\alpha$-divergences, using a moment constraint of the form $a(\theta_2) =\theta_2^{\kappa}$ for the second component is relevant here as long as $\kappa \in \left(0, \frac{2}{1+1/\alpha}\right)$, to ensure that the resulting constrained prior is indeed proper. With $\alpha=0.5$, we take the value $\kappa=1/8$ and we use the same neural network.
 The evolution of the mutual information through the optimization of the constrained VA-RP is proposed in @fig-probit_constr_mi. In @fig-probit_constr_gap is presented the evolution of the constrained gap: the difference between the target and current values for the constraint.
 
 
@@ -1240,12 +1240,12 @@ plt.show()
 
 As @fig-probit_post_scatterhist shows, we obtain a relevant approximation of the true Jeffreys posterior especially on the variable $\theta_1$, whereas a small difference is present for the tail of the distribution on $\theta_2$. The latter remark was expected regarding the analytical study of the marginal distribution of $\pi_\lambda$ w.r.t. $\theta_2$  given the architecture considered for the VA-RP (see @eq-decay_rates_ptheta2).
 It is interesting to see that the difference between the posteriors is harder to discern in the neighborhood of $\theta_2=0$. Indeed, in such case where the data are not degenerate, the likelihood provides a strong decay rate when $\theta_2\rightarrow0$ that makes the influence of the prior negligible (see @van2024reference):
-    \begin{equation}
-        L_N(\bX|\theta) \aseq{\theta_2\rightarrow0} \theta_2^{\|\chi\|_2^2}\exp\left(-\frac{1}{2\theta_2^2}\sum_{i=1}^N\chi_i(\log a_i-\log\theta_1)^2 \right),
-    \end{equation}
+$$
+L_N(\bX\,|\,\theta) \aseq{\theta_2\rightarrow0} \theta_2^{\|\chi\|_2^2}\exp\left(-\frac{1}{2\theta_2^2}\sum_{i=1}^N\chi_i(\log a_i-\log\theta_1)^2 \right),
+$$
 where $\chi\in\{0,1\}^N$ is a non-null vector that depends on $\bX$.
 
-When $\theta_2\rightarrow\infty$, however, the likelihood does not reduce the influence of the prior has it remains asymptotically constant: $L_N(\bX|\theta) \conv{\theta_2\rightarrow\infty}2^{-N}$.
+When $\theta_2\rightarrow\infty$, however, the likelihood does not reduce the influence of the prior has it remains asymptotically constant: $L_N(\bX \,|\,\theta) \conv{\theta_2\rightarrow\infty}2^{-N}$.
 
 
 ```{python stem-plot}
