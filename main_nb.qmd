@@ -1757,7 +1757,7 @@ N_max = 200
 N_init = 5
 tab_N = np.arange(N_init, N_max+N_init, 5)
 QE = np.zeros((len(tab_N), num_M))
-file_name = os.path.join(varp_probit_path, 'Quadratic_errors\\Quad_error_post')
+file_name = os.path.join(varp_probit_path, 'Quadratic_errors/Quad_error_post')
 first_file = file_name + '1.pkl'
 for M in range(num_M):
     file = file_name + f'{M+1}.pkl'
@@ -1815,7 +1815,7 @@ N_max = 200
 N_init = 5
 tab_N = np.arange(N_init, N_max+N_init, 5)
 QE = np.zeros((len(tab_N), num_M))
-file_name = os.path.join(varp_probit_path, 'Quadratic_errors\\Quad_error_post_constr')
+file_name = os.path.join(varp_probit_path, 'Quadratic_errors/Quad_error_post_constr')
 first_file = file_name + '1.pkl'
 for M in range(num_M):
     file = file_name + f'{M+1}.pkl'
@@ -1874,7 +1874,7 @@ plt.show()
 #| fig-cap: "Empirical cumulative distribution functions for the unconstrained fitted posterior and the Jeffreys posterior using $5000$ samples. The band is obtained by computing the ECDFs over $100$ different seeds and monitoring the maximum and minimum ECDF values for each $\\theta$."
 
 n_exp = 100   # Number of experiments
-model = os.path.join(varp_probit_path, 'probit_samples\\probit')
+model = os.path.join(varp_probit_path, 'probit_samples/probit')
 q = 2
 first_file = model + '_seed_1.pkl' 
  
@@ -1953,7 +1953,7 @@ plt.show()
 #| fig-cap: "Empirical cumulative distribution functions for the constrained fitted posterior and the Jeffreys posterior using $5000$ samples. The band is obtained by computing the ECDFs over $100$ different seeds and monitoring the maximum and minimum ECDF values for each $\\theta$."
 
 n_exp = 100   # Number of experiments
-model = os.path.join(varp_probit_path, 'probit_samples\\probit_constr')
+model = os.path.join(varp_probit_path, 'probit_samples/probit_constr')
 q = 2
 first_file = model + '_seed1.pkl' 
 n_samples_prior = 10**6
