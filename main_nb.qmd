@@ -246,10 +246,10 @@ In our experiments, the implementation of the algorithm is done with the popular
 
 Concerning the choice of objective function, we verify that $I_{\rD_f}$ is compatible with our method by computing its gradient:
 $$
-\begin{align*}
-\frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) &= \mathbb{E}_{\varepsilon}\left[\sum_{j=1}^q\frac{\partial \tilde{I}}{\partial \theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon)\right] \\
-&+ \mathbb{E}_{\theta \sim \pi_{\lambda}}\left[ \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{1}{L_N(\bX \,|\,\theta)} \frac{\partial p_{\lambda}}{\partial \lambda_l}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]  \right],
-\end{align*}
+\begin{aligned}
+\frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) & = \mathbb{E}_{\varepsilon}\left[\sum_{j=1}^q\frac{\partial \tilde{I}}{\partial \theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon)\right] \\
+& + \mathbb{E}_{\theta \sim \pi_{\lambda}}\left[ \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{1}{L_N(\bX \,|\,\theta)} \frac{\partial p_{\lambda}}{\partial \lambda_l}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]  \right],
+\end{aligned}
 $$
 where:
 $$
@@ -316,10 +316,10 @@ $$
 $$
 with $a_k$ : $\Theta \mapsto \mathbb{R}^+$ integrable and linearly independent functions, and $b_k \in \mathbb{R}$. We then adapt the optimization problem in @eq-opti_pb_pilambda to propose the following constrained optimization problem:
 $$
-\begin{align*}
+\begin{aligned}
 & \pi^C_{\lambda^\ast} \in \underset{\lambda \in \Lambda}{\operatorname{argmax}} \, \mathcal{O}_{\rD_f}(\pi_{\lambda}; L_N) \\
 & \text{subject to} \quad \forall \,k \in \{1, \ldots, K\}, \, \,   \, \mathcal{C}_k(\pi_{\lambda}) = 0,
-\end{align*}
+\end{aligned}
 $$
 where $\pi^C_{\lambda^\ast}$ is the constrained VA-RP. The optimization problem with the mutual information has an explicit asymptotic solution for proper priors verifying the previous conditions: 
 
@@ -380,10 +380,10 @@ $$
 Its gradient has a form that  which is compatible with our algorithm, as depicted in @sec-sga (see @eq-compatible_objective_function):
 
 $$
-\begin{align*}
- \frac{\partial \mathcal{L}_A}{\partial \lambda}(\lambda, \eta, \tilde{\eta}) &= \frac{\partial \mathcal{O}_{\rD_f}}{\partial \lambda}(\pi_{\lambda}; L_N) +  \mathbb{E}_{\varepsilon}\left[ \left(\sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)\right] \\
-&= \mathbb{E}_{\varepsilon}\left[ \left( \frac{\partial \tilde{\mathcal{O}}}{\partial \theta}(g(\lambda,\varepsilon))  + \sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)  \right] .
-\end{align*}
+\begin{aligned}
+ \frac{\partial \mathcal{L}_A}{\partial \lambda}(\lambda, \eta, \tilde{\eta}) & = \frac{\partial \mathcal{O}_{\rD_f}}{\partial \lambda}(\pi_{\lambda}; L_N) +  \mathbb{E}_{\varepsilon}\left[ \left(\sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)\right] \\
+& = \mathbb{E}_{\varepsilon}\left[ \left( \frac{\partial \tilde{\mathcal{O}}}{\partial \theta}(g(\lambda,\varepsilon))  + \sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)  \right] .
+\end{aligned}
 $$
 In practice, the augmented Lagrangian algorithm is of the form: 
 $$
@@ -428,13 +428,13 @@ The previous approach is valid because $\pi_{\lambda}(\cdot \, | \, \bX)$ and $\
 
 Using the definitions of the different distributions, we have that: 
 $$
-\begin{align*}
-    \int_{\Theta} \varphi(\theta) \tilde{\pi}_{\lambda}(\theta \, | \, \bX) d\theta &= \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \pi_{\varepsilon,\lambda}(\varepsilon \, | \, \bX) d\varepsilon \\
-    &= \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \frac{p_{\varepsilon}(\varepsilon)L_N(X\, | \, g(\lambda, \varepsilon))}{p_{\lambda}(\bX)} d\varepsilon \\
-    &= \int_{\Theta} \varphi(\theta)\pi_{\lambda}(\theta) \frac{L_N(\bX \, | \, \theta)}{p_{\lambda}(\bX)}
+\begin{aligned}
+    \int_{\Theta} \varphi(\theta) \tilde{\pi}_{\lambda}(\theta \, | \, \bX) d\theta & = \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \pi_{\varepsilon,\lambda}(\varepsilon \, | \, \bX) d\varepsilon \\
+    & = \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \frac{p_{\varepsilon}(\varepsilon)L_N(X\, | \, g(\lambda, \varepsilon))}{p_{\lambda}(\bX)} d\varepsilon \\
+    & = \int_{\Theta} \varphi(\theta)\pi_{\lambda}(\theta) \frac{L_N(\bX \, | \, \theta)}{p_{\lambda}(\bX)}
      d\theta \\
-    &= \int_{\Theta} \varphi(\theta) \pi_{\lambda}(\theta \, | \, \bX) d\theta.
-\end{align*}
+    & = \int_{\Theta} \varphi(\theta) \pi_{\lambda}(\theta \, | \, \bX) d\theta.
+\end{aligned}
 $$
 As mentioned in the last Section, when the RP is improper, we compare the posterior distributions, namely, the exact reference posterior when available and the posterior obtained from the VA-RP using the previous method. Altogether, we are able to sample $\theta$ from the posterior even if the density of the parametric prior $\pi_{\lambda}$ on $\theta$ is unavailable due to an implicit definition of the prior distribution. 
 
@@ -1353,17 +1353,17 @@ This research was supported by the CEA (French Alternative Energies and Atomic E
 
 We recall that $F(x) = f(x)-xf'(x)$ and $p_{\lambda}$ is a shortcut notation for $p_{\pi_{\lambda}, N}$ being the marginal distribution under $\pi_{\lambda}$. The generalized mutual information writes : 
 $$
-\begin{align*}
-    I_{\rD_f}(\pi_{\lambda}; L_N) &= \int_{\Theta}{\rD_f}(p_{\lambda}||L_N(\cdot \, | \, \theta)) \pi_{\lambda}(\theta)d\theta \\
-    &= \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta.
-\end{align*}
+\begin{aligned}
+    I_{\rD_f}(\pi_{\lambda}; L_N) & = \int_{\Theta}{\rD_f}(p_{\lambda}||L_N(\cdot \, | \, \theta)) \pi_{\lambda}(\theta)d\theta \\
+    & = \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta.
+\end{aligned}
 $$
 For each $l$, taking the derivative with respect to $\lambda_l$ yields : 
 $$
-\begin{align*}
-\frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) &= \int_{\Theta} \int_{\mathcal{X}^N} \frac{\partial \pi_{\lambda}}{\partial \lambda_l}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta \\
-&+ \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)\frac{\partial p_{\lambda}}{\partial \lambda_l}\frac{1}{L_N(\bX \, | \, \theta)}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta, 
-\end{align*}
+\begin{aligned}
+\frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) & = \int_{\Theta} \int_{\mathcal{X}^N} \frac{\partial \pi_{\lambda}}{\partial \lambda_l}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta \\
+& + \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)\frac{\partial p_{\lambda}}{\partial \lambda_l}\frac{1}{L_N(\bX \, | \, \theta)}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta, 
+\end{aligned}
 $$
 or in terms of expectations : 
 $$
@@ -1382,11 +1382,11 @@ $$
 
 We have the following for every $j \in \{1,...,q\}$ : 
 $$
-\begin{align*}
-\frac{\partial \tilde{I}}{\partial \theta_j}(\theta) &= \int_{\mathcal{X}^N}   \frac{- p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}   \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) + f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
-&= \int_{\mathcal{X}^N}F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
-&=  \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{\partial \log L_N}{\partial \theta_j}(\bX \,|\,\theta) F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]. 
-\end{align*}
+\begin{aligned}
+\frac{\partial \tilde{I}}{\partial \theta_j}(\theta) & = \int_{\mathcal{X}^N}   \frac{- p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}   \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) + f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
+& = \int_{\mathcal{X}^N}F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
+& =  \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{\partial \log L_N}{\partial \theta_j}(\bX \,|\,\theta) F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]. 
+\end{aligned}
 $$
 
 Putting everything together, we finally obtain the desired formula. The gradient of the generalized lower bound function is obtained in a very similar manner.
