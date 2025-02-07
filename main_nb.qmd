@@ -45,10 +45,6 @@ jupyter: python3
 \newcommand{\aseq}[2][]{\overset{#1}{\underset{#2}{=}}}
 \newcommand{\conv}[2][\ ]{\overset{#1}{\underset{#2}{\to}}}
 
-$$
-\DeclareMathOperator*{\argmax}{arg\,max}
-$$
-
 ::: 
 
 ```{python python-code}
