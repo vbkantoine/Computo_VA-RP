@@ -44,6 +44,11 @@ jupyter: python3
 \newcommand{\rD}{\mathrm{D}}
 \newcommand{\aseq}[2][]{\overset{#1}{\underset{#2}{=}}}
 \newcommand{\conv}[2][\ ]{\overset{#1}{\underset{#2}{\to}}}
+
+$$
+\DeclareMathOperator*{\argmax}{arg\,max}
+$$
+
 ::: 
 
 ```{python python-code}
@@ -122,15 +127,11 @@ The reference prior theory fits into the usual framework of statistical inferenc
 The situation is the following: we observe i.i.d data samples $\bX = (X_1,..., X_N) \in \mathcal{X}^N$ with $\mathcal{X} \subset \mathbb{R}^d$. We suppose that the likelihood function $L_N(\mathbf{X} \, | \, \theta) = \prod_{i=1}^N L(X_i \, | \, \theta)$ is known and $\theta \in \Theta \subset \mathbb{R}^q$ is the parameter we want to infer. Since we use the Bayesian framework, $\theta$ is considered to be a random variable with a prior distribution $\pi$. We also define the marginal likelihood $p_{\pi, N}(\bX) = \int_{\Theta}\pi(\theta)L_N(\bX \, | \, \theta)d\theta$ associated to the marginal probability measure $\mathbb{P}_{\pi, N}$. The non-asymptotic RP, first introduced in @Bernardo1979a and formalized in @berger2009formal, is defined to be one of the priors verifying:
 
 $$
-\begin{equation}
     \pi^\ast \in \argmax_{\pi \in \mathcal{P}} I(\pi; L_N) \ ,
-\end{equation}
 $$ {#eq-RPdef}
 where $\mathcal{P}$ is a class of admissible probability distributions and  $I(\pi; L_N)$ is the mutual information for the prior $\pi$ and the likelihood $L_N$ between the random variable of the parameters $\theta \sim \pi$ and the random variable of the data $\bX \sim \mathbb{P}_{\pi, N}$: 
 $$
-\begin{equation}
     I(\pi; L_N) = \int_{\mathcal{X}^N}{\rm KL}(\pi(\cdot \,|\, \bX) \, || \,  \pi) p_{\pi,N}(\bX)d\bX
-\end{equation}
 $$ {#eq-mutualinfoberger}
 Hence, $\pi^\ast$ is a prior that maximizes the Kullback-Leibler divergence between itself and its posterior averaged by the marginal distribution of datasets. The Kullback-Leibler divergence between two probability measures of density $p$ and $q$ defined on a generic set $\Omega$ writes:
 \begin{equation*}
@@ -140,27 +141,22 @@ Thus, $\pi^\ast$ is the prior that maximises the influence of the data on the po
 
 Using Fubini's theorem and Bayes' theorem, we can derive an alternative and more practical expression for the mutual information : 
 $$
-\begin{equation}
     I(\pi; L_N) = \int_{\Theta}{\rm KL}(L_N(\cdot \, | \, \theta)||p_{\pi,N}) \pi(\theta)d\theta.
-\end{equation}
 $$ {#eq-mutualinfo}
 A more generalized definition of RPs has been proposed in @van2023generalized using $f$-divergences. The $f$-divergence mutual information is defined by
 $$
-\begin{equation}
     I_{\rD_f}(\pi; L_N) = \int_{\Theta}{\rD_f}(p_{\pi,N}||L_N(\cdot \, | \, \theta)) \pi(\theta)d\theta \ ,
-\end{equation}
 $$ {#eq-mutual-info-Df}
 with 
-\begin{equation*}
+
+$$
     \rD_f(p\,||\,q) = \int_{\Omega} f\left(\frac{p(\omega)}{q(\omega)}\right) q(\omega)d\omega. \ ,
-\end{equation*}
+$$
 where $f$ is usually chosen to be a convex function mapping 1 to 0. Remark that the classical mutual information is obtained by choosing $f = -\log$, indeed, $\rD_{-\log}(p\,||\,q) = {\rm KL}(q\,||\,p)$. The formal RP is defined as $N$ goes to infinity, but since we want to develop an algorithm to approximate the distribution of the RP, we are restricted to the case where $N$ takes a finite value. However, the limit case $N \rightarrow +\infty$ is relevant because it has been shown in @clarke1994jeffreys, @van2023generalized
 that the solution of this asymptotic problem is the Jeffreys prior when the mutual information is expressed as in @eq-mutualinfoberger, or when it is defined using an $\alpha$-divergence, as in @eq-mutual-info-Df with $f=f_\alpha$, where:
 
 $$
-\begin{equation}
     f_\alpha(x) = \frac{x^{\alpha}-\alpha x -(1-\alpha)}{\alpha(\alpha-1)}, \quad \alpha\in(0,1).
-\end{equation}
 $$ {#eq-falpha}
 The Jeffreys prior, denoted by $J$, is defined as follows:
 $$
@@ -180,20 +176,17 @@ Technically, the formal RP is constructed such that its projection on every comp
 
 In our algorithm we consider probability distributions defined on the space $\Theta$ and not on sequences of subsets. A consequence of this statement is that our algorithm may tend to approximate improper priors in some cases. Indeed, any given sample by our algorithm results, by construction, from a proper distribution, which is expected to be a good approximation of the solution of the optimization problem expressed in @eq-RPdef. If $N$ is large enough, the latter should be close to the  ---potentially improper--- theoretical RP. This approach is justified to some extent since in the context of Q-vague convergence defined in @Bioche2016 for instance, improper priors can be the limit of sequences of proper priors. Although this theoretical notion of convergence is defined, no concrete metric is given, making quantification of the difference between proper and improper priors infeasible in practice. Furthermore, as mentioned in the introduction, improper priors can also compromise the validity of {a posteriori} estimates in some cases. To address this issue, we adapted our algorithm to handle the developments made in @van2024constr, which suggest a method to define proper RPs by simply resolving a constrained version of the initial optimization problem:
 $$
-\begin{equation}
     \tilde\pi^* \in \argmax_{\substack{\pi \, \text{prior}\\ \text{s.t.}\,\mathcal{C}(\pi)<\infty}} I_{\rD_{f_\alpha}}(\pi; L_N),
-\end{equation}
 $$ {#eq-def_const_RP}
 where $\mathcal{C}(\pi)$ defines a constraint of the form $\int_\Theta a(\theta)\pi(\theta)d\theta$, $a$ being a positive function. When the mutual information in the above optimization problem is defined from an $\alpha$-divergence, and when $a$ verifies
 $$
-\begin{equation}
     \int_\Theta J(\theta)a(\theta)^{1/\alpha}d\theta<\infty\quad \text{and}\quad \int_\Theta J(\theta)a(\theta)^{1+1/\alpha}d\theta<\infty,
-\end{equation}
 $$ {#eq-condtitions_a}
 the author has proven that the constrained RP $\tilde\pi^\ast$ asymptotically takes the following form:
-\begin{equation*}
+
+$$
     \tilde\pi^\ast(\theta) \propto J(\theta)a(\theta)^{1/\alpha},
-\end{equation*}
+$$
 which is proper.
 
 
@@ -230,9 +223,7 @@ The choice of the neural network is up to the user, we will showcase in our nume
 
 The VA-RP is formulated as the solution to the following optimization problem:
 $$
-\begin{equation}
     \pi_{\lambda^\ast}=\argmax_{\lambda\in\Lambda} \mathcal{O}_{\rD_f}(\pi; L_N),
-\end{equation}
 $$ {#eq-opti_pb_pilambda}
 where $\pi_\lambda$ is parameterized through the relation between a latent variable $\varepsilon$ and  the parameter $\theta$, as outlined in the preceding Section. The function $\mathcal{O}_{\rD_f}$ is called the objective function, it is maximized using  stochastic gradient optimization, following the approach described in @gauchy_var_rp.
 
@@ -240,19 +231,15 @@ It is intuitive to fix $\mathcal{O}_{\rD_f}$ to equal $I_{\rD_f}$, in order to m
 In this Section, we suggest alternative objective functions that can be considered to compute the VA-RP.
 Our method is adaptable to any objective function $\mathcal{O}_{\rD_f}$  admitting a gradient w.r.t. $\lambda=(\lambda_1,\dots,\lambda_L)$ that takes the form
 $$
-\begin{equation}
     \frac{\partial \mathcal{O}_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) = \mathbb{E}_{\varepsilon}\left[\sum_{j=1}^q\frac{\partial \tilde{\mathcal{O}}_{\rD_f}}{\partial \theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon)\right]
-\end{equation}
 $$ {#eq-compatible_objective_function}
 for any $l\in\{1,\dots,L\}$, where  $\tilde{\mathcal O}_{\rD_f}$ is independent of $\lambda$.
 This framework allows for flexible implementation, as it permits the separation of sampling and differentiation operations:
 
-\begin{itemize}
-    \item The gradient of $\tilde{\mathcal{O}}_{\rD_f}$ mostly relies on random sampling and depends only on the likelihood $L_N$ and the function $f$.
-    \item The gradient of $g$ is
+- The gradient of $\tilde{\mathcal{O}}_{\rD_f}$ mostly relies on random sampling and depends only on the likelihood $L_N$ and the function $f$.
+- The gradient of $g$ is
     computed independently. In practice, 
     it is possible to leverage usual  differentiation techniques for the neural network.  In our work, we rely on PyTorch's automatic differentiation feature ``autograd'' @torch2019.
-\end{itemize}
 
 This separation is advantageous as  automatic differentiation tools ---such as autograd--- are well-suited to differentiating complex networks but struggle with functions incorporating randomness.
 
@@ -261,34 +248,32 @@ In our experiments, the implementation of the algorithm is done with the popular
 
 
 Concerning the choice of objective function, we verify that $I_{\rD_f}$ is compatible with our method by computing its gradient:
+$$
 \begin{align*}
 \frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) &= \mathbb{E}_{\varepsilon}\left[\sum_{j=1}^q\frac{\partial \tilde{I}}{\partial \theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon)\right] \\
 &+ \mathbb{E}_{\theta \sim \pi_{\lambda}}\left[ \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{1}{L_N(\bX \,|\,\theta)} \frac{\partial p_{\lambda}}{\partial \lambda_l}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]  \right],
 \end{align*}
+$$
 where:
-\begin{equation*}
+$$
     \frac{\partial \tilde{I}}{\partial \theta_j}(\theta) = \mathbb{E}_{\bX \sim L_N(\cdot \,|\,\theta)}\left[ \frac{\partial \log L_N}{\partial \theta_j}(\bX \,| \,\theta)F \left(\frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)} \right)  \right], 
-\end{equation*}
+$$
 with $F(x) = f(x)-xf'(x)$ and $p_{\lambda}$ is a shortcut notation for $p_{\pi_{\lambda}, N}$ being the marginal distribution under $\pi_{\lambda}$. The details are given in the @sec-grad_comp.
 Remark that only the case $f=-\log$ is considered by @gauchy_var_rp, but it leads to a simplification of the gradient since the second term vanishes.
 Each term in the above equations is approximated as follows:
 $$
-\begin{equation}
  \begin{cases} \displaystyle
      p_{\lambda}(\bX) = \mathbb{E}_{\theta \sim \pi_{\lambda}}[L_N(\bX \, | \, \theta)] \approx \frac{1}{T} \sum_{t=1}^T L_N(\bX \, | \, g(\lambda, \varepsilon_t)) \quad \text{where} \quad \varepsilon_1,...\,, \varepsilon_T \sim \mathbb{P}_{\varepsilon} \\
 \displaystyle
      \frac{\partial \tilde{I}}{\partial \theta_j}(\theta) \approx \frac{1}{U} \sum_{u=1}^{U} \frac{\partial \log L_N}{\partial \theta_j}(\bX^u \,| \,\theta)F \left(\frac{p_{\lambda}(\bX^u)}{L_N(\bX^u \,|\, \theta)} \right) \quad \text{where} \quad \bX^1,...\,,\bX^{U} \sim \mathbb{P}_{\bX|\theta}
 .\end{cases}  
-\end{equation}
 $$ {#eq-MCgradI}
 
 In their work, @nalisnick2017learning propose an alternative objective function to optimize, that we call $B_{\rD_f}$.
 
 This function corresponds to a lower bound of the mutual information. It is derived from an upper bound on the marginal distribution and relies on maximizing the likelihood. Their approach is only presented for $f=-\log$, we generalize the lower bound for any decreasing function $f$: 
 $$
-\begin{equation}
     B_{\rD_f}(\pi; L_N) = \displaystyle \int_{\Theta}\int_{\mathcal{X}^N}f\left(\frac{L_N(\bX\, |\, \hat{\theta}_{MLE})}{L_N(\bX\, |\, \theta)}\right)\pi(\theta)L_N(\bX\, | \, \theta)d\bX d\theta,
-\end{equation}
 $$ {#eq-Bdf}
 where $\hat{\theta}_{MLE}$ being the maximum likelihood estimator (MLE). 
 It only depends on the likelihood and not on $\lambda$ which simplifies the gradient computation: 
@@ -333,10 +318,12 @@ $$
  \forall \, k \in \{1,\ldots,K\} \text{,}\, \,   \, \mathcal{C}_k(\pi_{\lambda}) = \mathbb{E}_{\theta \sim \pi_{\lambda}} \left[ a_k(\theta) \right] - b_k,
 $$
 with $a_k$ : $\Theta \mapsto \mathbb{R}^+$ integrable and linearly independent functions, and $b_k \in \mathbb{R}$. We then adapt the optimization problem in @eq-opti_pb_pilambda to propose the following constrained optimization problem:
+$$
 \begin{align*}
 & \pi^C_{\lambda^\ast} \in \argmax_{\lambda \in \Lambda} \, \mathcal{O}_{\rD_f}(\pi_{\lambda}; L_N) \\
 & \text{subject to} \quad \forall \,k \in \{1, \ldots, K\}, \, \,   \, \mathcal{C}_k(\pi_{\lambda}) = 0,
 \end{align*}
+$$
 where $\pi^C_{\lambda^\ast}$ is the constrained VA-RP. The optimization problem with the mutual information has an explicit asymptotic solution for proper priors verifying the previous conditions: 
 
 - In the case of the KL-divergence (@bernardo2005reference): 
@@ -395,10 +382,12 @@ $$
 $$
 Its gradient has a form that  which is compatible with our algorithm, as depicted in @sec-sga (see @eq-compatible_objective_function):
 
+$$
 \begin{align*}
  \frac{\partial \mathcal{L}_A}{\partial \lambda}(\lambda, \eta, \tilde{\eta}) &= \frac{\partial \mathcal{O}_{\rD_f}}{\partial \lambda}(\pi_{\lambda}; L_N) +  \mathbb{E}_{\varepsilon}\left[ \left(\sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)\right] \\
 &= \mathbb{E}_{\varepsilon}\left[ \left( \frac{\partial \tilde{\mathcal{O}}}{\partial \theta}(g(\lambda,\varepsilon))  + \sum_{k=1}^K  \frac{\partial a_k}{\partial \theta}(g(\lambda, \varepsilon))(\eta_k - \tilde{\eta}_k\mathcal{C}_k(\pi_{\lambda}))\right)\frac{\partial g}{\partial \lambda}(\lambda,\varepsilon)  \right] .
 \end{align*}
+$$
 In practice, the augmented Lagrangian algorithm is of the form: 
 $$
    \begin{cases}
@@ -441,6 +430,7 @@ $$
 The previous approach is valid because $\pi_{\lambda}(\cdot \, | \, \bX)$ and $\tilde{\pi}_{\lambda}(\cdot \, | \, \bX)$ lead to the same distribution, as proven by the following derivation : let $\varphi$ be a bounded and measurable function on $\Theta$. 
 
 Using the definitions of the different distributions, we have that: 
+$$
 \begin{align*}
     \int_{\Theta} \varphi(\theta) \tilde{\pi}_{\lambda}(\theta \, | \, \bX) d\theta &= \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \pi_{\varepsilon,\lambda}(\varepsilon \, | \, \bX) d\varepsilon \\
     &= \int_{\mathbb{R}^p} \varphi(g(\lambda, \varepsilon)) \frac{p_{\varepsilon}(\varepsilon)L_N(X\, | \, g(\lambda, \varepsilon))}{p_{\lambda}(\bX)} d\varepsilon \\
@@ -448,6 +438,7 @@ Using the definitions of the different distributions, we have that:
      d\theta \\
     &= \int_{\Theta} \varphi(\theta) \pi_{\lambda}(\theta \, | \, \bX) d\theta.
 \end{align*}
+$$
 As mentioned in the last Section, when the RP is improper, we compare the posterior distributions, namely, the exact reference posterior when available and the posterior obtained from the VA-RP using the previous method. Altogether, we are able to sample $\theta$ from the posterior even if the density of the parametric prior $\pi_{\lambda}$ on $\theta$ is unavailable due to an implicit definition of the prior distribution. 
 
 For our computations, we choose MCMC sampling, namely an adaptive Metropolis-Hastings sampler with a multivariate Gaussian as the proposition distribution. The adaptation scheme is the following:  for each batch of iterations, we monitor the acceptance rate and we adapt the variance parameter of the Gaussian proposition in order to have an acceptance rate close to 40\%, which is the advised value @gelman2013 for models in small dimensions. We refer to this algorithm as MH($\varepsilon$). Because we apply MCMC sampling on variable $\varepsilon \in \mathbb{R}^p$ with a reasonable value for $p$, we expect this step of the algorithm to be fast compared to the computation of the VA-RP. 
@@ -1364,15 +1355,19 @@ This research was supported by the CEA (French Alternative Energies and Atomic E
 
 
 We recall that $F(x) = f(x)-xf'(x)$ and $p_{\lambda}$ is a shortcut notation for $p_{\pi_{\lambda}, N}$ being the marginal distribution under $\pi_{\lambda}$. The generalized mutual information writes : 
+$$
 \begin{align*}
     I_{\rD_f}(\pi_{\lambda}; L_N) &= \int_{\Theta}{\rD_f}(p_{\lambda}||L_N(\cdot \, | \, \theta)) \pi_{\lambda}(\theta)d\theta \\
     &= \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta.
 \end{align*}
+$$
 For each $l$, taking the derivative with respect to $\lambda_l$ yields : 
+$$
 \begin{align*}
 \frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) &= \int_{\Theta} \int_{\mathcal{X}^N} \frac{\partial \pi_{\lambda}}{\partial \lambda_l}(\theta)L_N(\bX \, | \, \theta)f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta \\
 &+ \int_{\Theta} \int_{\mathcal{X}^N} \pi_{\lambda}(\theta)L_N(\bX \, | \, \theta)\frac{\partial p_{\lambda}}{\partial \lambda_l}\frac{1}{L_N(\bX \, | \, \theta)}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \, | \, \theta)}\right) d\bX d\theta, 
 \end{align*}
+$$
 or in terms of expectations : 
 $$
 \frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) = \frac{\partial}{\partial \lambda_l} \mathbb{E}_{\theta \sim \pi_{\lambda}} \left[ \tilde{I}(\theta)  \right] 
@@ -1389,11 +1384,13 @@ $$
 $$
 
 We have the following for every $j \in \{1,...,q\}$ : 
+$$
 \begin{align*}
 \frac{\partial \tilde{I}}{\partial \theta_j}(\theta) &= \int_{\mathcal{X}^N}   \frac{- p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}   \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) + f\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
 &= \int_{\mathcal{X}^N}F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right) \frac{\partial L_N}{\partial \theta_j}(\bX \,|\,\theta) d\bX  \\
 &=  \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{\partial \log L_N}{\partial \theta_j}(\bX \,|\,\theta) F\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]. 
 \end{align*}
+$$
 
 Putting everything together, we finally obtain the desired formula. The gradient of the generalized lower bound function is obtained in a very similar manner.
 
