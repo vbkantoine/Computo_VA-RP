@@ -1,7 +1,6 @@
 jupyter
 matplotlib
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch
+pytorch
 numpy
 tqdm
 scipy
