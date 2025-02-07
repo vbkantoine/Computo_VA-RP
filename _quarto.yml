@@ -1,2 +1,3 @@
 project:
+  type: website
   title: "template-computo-python"
