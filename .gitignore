@@ -14,4 +14,4 @@ _extensions/
 *.log
 *.toc
 # Jupyter notebook
-data_probit/Multiseed_AJ/*.ipynb
+probit_runs_with_Jeffreys.ipynb
