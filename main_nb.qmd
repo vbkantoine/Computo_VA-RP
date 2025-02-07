@@ -34,8 +34,12 @@ published: false # will be set to true once accepted
 format:
   computo-html: default
   computo-pdf: default
-
 jupyter: python3
+execute:
+  freeze: false  # Forces re-execution
+  echo: true
+  warning: true
+  error: true
 
 ---
 
