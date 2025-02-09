@@ -1,9 +1,13 @@
 
 # Variational inference for approximate reference priors using neural networks
 
+Nils Baillie, Antoine Van Biesbroeck and Clément Gauchy
+
 ## Guidelines
 
-The folder Multiseed_AJ contains saved *a posteriori* estimates for the probit statistical model.
+The main notebook is obtained by default by loading every necessary data file without doing the computations, some options in the beginning of the code can be changed if one wants to re-train the networks or re-sample the posterior distributions. These files are mainly there to generate the plots rapidly, they can be found in the folder "plots_data".
+
+For the probit model, the computations were made on many different RNG seeds, the output files and the corresponding scripts can be found in the folder "data_probit/Multiseed_VARP". The folder "data_probit/Multiseed_AJ" contains saved *a posteriori* estimates for the probit statistical model.
 
 The posterior is derived from the Jeffreys prior or the constrained Jeffreys prior of the model:
     $$\pi(\theta|\mathbf{X}) \propto J(\theta)L_N(\mathbf{X}|\theta) \quad\text{or}\quad \pi(\theta|\mathbf{X}) \propto J(\theta)\theta_{2}^{\kappa/\alpha}L_N(\mathbf{X}|\theta)$$
