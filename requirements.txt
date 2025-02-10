@@ -1,6 +1,6 @@
 jupyter
 numpy==1.26.4
-pytorch==2.2.0
+pytorch
 matplotlib==3.8.0
 scikit-learn==1.2.2
 scipy==1.11.4
