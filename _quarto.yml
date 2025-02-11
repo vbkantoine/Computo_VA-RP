@@ -1,2 +1,4 @@
 project:
   title: "VA-RP"
+  render:
+    - main_nb.qmd
