@@ -20,6 +20,6 @@ In Bayesian statistics, the choice of the prior can have an important influence 
 
 The main notebook is obtained by default by loading every necessary data file without doing the computations, some options in the beginning of the code can be changed if one wants to re-train the networks or re-sample the posterior distributions. These files are mainly there to generate the plots rapidly, they can be found in the folder "plots_data".
 
-For the probit model, the computations were made on many different RNG seeds, the output files and the corresponding scripts can be found in the folder "data_probit/Multiseed_VARP".
+For the probit model, the computations were made on many different RNG seeds, the output files and the corresponding scripts can be found in the folders "data_probit/Multiseed_VARP" and "data_probit/Multiseed_AJ".
 
 
