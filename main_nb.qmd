@@ -248,12 +248,13 @@ $$
 \frac{\partial I_{\rD_f}}{\partial \lambda_l}(\pi_{\lambda}; L_N) & = \mathbb{E}_{\varepsilon}\left[\sum_{j=1}^q\frac{\partial \tilde{I}}{\partial \theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon)\right] \\
 & + \mathbb{E}_{\theta \sim \pi_{\lambda}}\left[ \mathbb{E}_{\bX \sim L_N(\cdot |\theta)}\left[ \frac{1}{L_N(\bX \,|\,\theta)} \frac{\partial p_{\lambda}}{\partial \lambda_l}(\bX)f'\left( \frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)}\right)\right]  \right],
 \end{aligned}
-$$
+$$ {#eq-gradientIdf}
 where:
 $$
     \frac{\partial \tilde{I}}{\partial \theta_j}(\theta) = \mathbb{E}_{\bX \sim L_N(\cdot \,|\,\theta)}\left[ \frac{\partial \log L_N}{\partial \theta_j}(\bX \,| \,\theta)F \left(\frac{p_{\lambda}(\bX)}{L_N(\bX \,|\,\theta)} \right)  \right], 
 $$
-with $F(x) = f(x)-xf'(x)$ and $p_{\lambda}$ is a shortcut notation for $p_{\pi_{\lambda}, N}$ being the marginal distribution under $\pi_{\lambda}$. The details are given in the @sec-grad_comp.
+with $F(x) = f(x)-xf'(x)$ and $p_{\lambda}$ is a shortcut notation for $p_{\pi_{\lambda}, N}$ being the marginal distribution under $\pi_{\lambda}$.
+In Appendix~@sec-grad_comp, we provide a detailed derivation of the above equation and show that the second term can be developed to align with the form of Equation~@eq-compatible_objective_function.
 Remark that only the case $f=-\log$ is considered by @gauchy_var_rp, but it leads to a simplification of the gradient since the second term vanishes.
 Each term in the above equations is approximated as follows:
 $$
@@ -1384,7 +1385,54 @@ $$
 \end{aligned}
 $$
 
+
 Putting everything together, we finally obtain the desired formula. The gradient of the generalized lower bound function is obtained in a very similar manner.
+
+In what follows, we prove that the gradient of $I_{\rD_f}$, as formulated in Equation~@eq-gradientIdf aligns with the form of Equation~@eq-compatible_objective_function. 
+We write, for $l\in\{1,\dots,L\}$:
+$$
+    \frac{\partial I_{\rD_f}}{\partial\lambda_l}(\pi_\lambda;L_N) = \mathbb{E}_\varepsilon \left[\sum_{j=1}^q\frac{\partial\tilde I}{\partial\theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial \lambda_l} (\lambda,\varepsilon) \right] 
+        + \mathcal{G}_l, 
+$$ 
+
+where 
+$$
+    \mathcal{G}_l=\mathbb{E}_{\theta\sim\pi_\lambda}\mathbb{E}_{\mathbf{X}\sim L_N(\cdot|\theta)}\left[\frac{1}{L_N(\mathbf{X}|\theta)}\frac{\partial p_\lambda}{\partial \lambda_l}(\mathbf{X})f'\left(\frac{p_\lambda(\mathbf{X})}{L_N(\mathbf{X}|\theta))} \right) \right].
+$$
+
+We remark that
+$$
+    \frac{\partial p_\lambda}{\partial \lambda_l} (\mathbf{X}) = \mathbb{E}_{\varepsilon_2} \sum_{j=1}^q\frac{\partial L_N}{\partial\theta_j} (\mathbf{X}|g(\lambda,\varepsilon_2))\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon_2).
+$$
+
+Thus, we can develop $\mathcal{G}_l$ as:
+$$
+ \begin{aligned}
+        \mathcal{G}_l = &\mathbb{E}_{\varepsilon_1}\mathbb{E}_{\mathbf{X}\sim L_N(\cdot|g(\lambda,\varepsilon_1))}\mathbb{E}_{\varepsilon_2}\sum_{j}\frac{1}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))} f'\left(\frac{p_\lambda(\mathbf{X})}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))}  \right)\frac{\partial L_N}{\partial\theta_j}(\mathbf{X}|g(\lambda,\varepsilon_2)) \frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon_2)\\
+        =& \mathbb{E}_{\varepsilon_2}\mathbb{E}_{\varepsilon_1}\mathbb{E}_{\mathbf{X}\sim L_N(\cdot|g(\lambda,\varepsilon_1))}\sum_{j}\frac{1}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))} f'\left(\frac{p_\lambda(\mathbf{X})}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))}  \right)\frac{\partial L_N}{\partial\theta_j}(\mathbf{X}|g(\lambda,\varepsilon_2)) \frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon_2)\\
+         =& \mathbb{E}_{\varepsilon_2}\sum_{j=1}^q\frac{\partial g_j}{\partial \lambda_l}(\lambda,\varepsilon_2) \mathbb{E}_{\varepsilon_1}\mathbb{E}_{\mathbf{X}\sim L_N(\cdot|g(\lambda,\varepsilon_1))} \frac{1}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))} f'\left(\frac{p_\lambda(\mathbf{X})}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))}  \right) \frac{\partial L_N}{\partial\theta_j}(\mathbf{X}|g(\lambda,\varepsilon_2)).
+\end{aligned}
+$$
+
+Now, calling $\tilde K$ the function defined as follows:
+$$
+    \tilde K:\theta\mapsto\tilde K(\theta) = \mathbb{E}_{\varepsilon_1}\mathbb{E}_{\mathbf{X}\sim L_N(\cdot|g(\lambda,\varepsilon_1))}\left[\frac{1}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))}f'\left(\frac{p_\lambda(\mathbf{X})}{L_N(\mathbf{X}|g(\lambda,\varepsilon_1))}  \right) L_N(\mathbf{X}|\theta)\right],
+$$
+
+we obtain that
+$$
+    \mathcal{G}_l = \mathbb{E}_{\varepsilon_2}\sum_{j=1}^q\frac{\partial g_j}{\partial\lambda_l}(\lambda,\varepsilon_2)\frac{\partial \tilde K}{\partial\theta_j} (g(\lambda,\varepsilon_2)). 
+$$
+
+Eventually, denoting $\tilde{\mathbf{I}}=\tilde K+\tilde I$, we have:
+$$
+    \frac{\partial I_{D_f}}{\partial \lambda_l}(\pi_\lambda;L_N) = \mathbb{E}_\varepsilon\left[\sum_{j=1}^q\frac{\partial\tilde{\mathbf{I}}}{\partial\theta_j}(g(\lambda,\varepsilon))\frac{\partial g_j}{\partial\lambda_l}(\lambda,\varepsilon)\right],
+$$
+
+which is compatible with the form of Equation~@eq-compatible_objective_function.
+
+
+
 
 ## Gaussian distribution with variance parameter
 
