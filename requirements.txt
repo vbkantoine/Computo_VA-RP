@@ -1,9 +1,9 @@
 jupyter
-matplotlib
+numpy==1.26.4
 pytorch
-numpy
-tqdm
-scipy
-numba
-scikit-learn
-pandas
+matplotlib==3.8.0
+scikit-learn==1.2.2
+scipy==1.11.4
+tqdm==4.65.0
+numba==0.59.0
+pandas==2.1.4
