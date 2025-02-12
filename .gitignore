@@ -8,6 +8,7 @@ _extensions/
 /.quarto/
 /.joblib
 /_extensions/
+*.DS_Store
 
 # Latex compilation files:
 *.aux
