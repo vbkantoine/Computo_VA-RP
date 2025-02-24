@@ -352,6 +352,8 @@ class Constraints_NeuralNet():
                 Collec_grad[:, num_grad] = one_grad
             # Average of gradients values 
             True_grad = torch.mean(Collec_grad, dim=1)
+            with torch.no_grad() :
+                True_grad += torch.Tensor(net.parameters())
             #print(f'True grad = {True_grad}')
             # Update parameters using true gradients
             index = 0
@@ -369,7 +371,7 @@ class Constraints_NeuralNet():
             # Check for NaN values in parameters
             if has_nan_params(net):
                 net.load_state_dict(last_valid_params)  # Load the last valid parameters
-                raise ValueError(f"NaN detected in parameters, stopping training at epoch {epoch}")
+                # raise ValueError(f"NaN detected in parameters, stopping training at epoch {epoch}")
             # Save the last valid parameters
             last_valid_params = {k: v.clone() for k, v in net.state_dict().items()}
             # Evaluate the MI periodically and save the best model parameters (if wanted)

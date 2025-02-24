@@ -297,6 +297,9 @@ class DivMetric_NeuralNet():
                 Collec_grad[:, num_grad] = one_grad
             # Average of gradients values 
             True_grad = torch.mean(Collec_grad, dim=1)
+            with torch.no_grad() :
+                # param_norm_grad = torch.Tensor([param for param in net.parameters()])
+                True_grad += all_params
             #print(f'True grad = {True_grad}')
             # Update parameters using true gradients
             index = 0

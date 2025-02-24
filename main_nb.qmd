@@ -49,7 +49,7 @@ jupyter: python3
 ```{python python-code}
 import os
 import sys
-base_dir = os.getcwd()  # the path must be set on VA-RP
+base_dir = r'/Users/antoinevanbiesbroeck/Documents/Github/Nils/Computo_VA-RP'  # the path must be set on VA-RP
 py_dir = os.path.join(base_dir, "python_files")
 if py_dir not in sys.path:
     sys.path.append(py_dir)
@@ -85,8 +85,8 @@ varp_probit_path = os.path.join(probit_path, "Multiseed_VARP")
 
 load_results_Multinom = True
 load_results_MultiMMD = True
-load_results_Probit_nocstr = True
-load_results_Probit_cstr = True
+load_results_Probit_nocstr = False
+load_results_Probit_cstr = False
 load_results_Normal_nocstr = True
 load_results_Normal_cstr = True
 
@@ -908,7 +908,7 @@ While $\|w_2\|_2$ does not tend toward $\infty$, these decay rates strongly diff
 
 
 ```{python python-code}
-# Parameters and classes
+#Parameters and classes
 p = 50   
 q = 2      
 N = 500     
@@ -927,26 +927,28 @@ name_file = 'Probit_results_unconstrained.pkl'
 file_path = os.path.join(path_plot, name_file)
 
 seed_all(0)
-NN = SingleLinear(input_size, output_size, m1=0, s1=0.1, b1=0, act1=nn.Identity())
-NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
-NN = AffineTransformation(NN, low, upp)
+sqrt2 = np.sqrt(2)
+act_bet = lambda x: torch.log(1- 0.5*(1+torch.erf(x/sqrt2)) )
+NN = NetProbitSeparate(input_size, m1=0, s1=0.1, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
+# NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
+# NN = AffineTransformation(NN, low, upp)
 VA = VA_NeuralNet(neural_net=NN, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=alpha, use_log_lik=True)
 with torch.no_grad():
     theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
 
-num_epochs = 10000
+num_epochs = 100
 loss_fct = "LB_MI"
 optimizer = torch_Adam
 num_samples_MI = 100
-freq_MI = 500
+freq_MI = 50
 save_best_param = True
 learning_rate = 0.001
 
 if not load_results_Probit_nocstr : 
     MI, range_MI, lower_MI, upper_MI = Div.Partial_autograd(J, N, num_epochs, loss_fct, optimizer, num_samples_MI, 
-                                                            freq_MI, save_best_param, learning_rate, momentum=True)
+                                                            freq_MI, save_best_param, learning_rate,num_samples_grad=40, momentum=True)
     all_params = torch.cat([param.view(-1) for param in NN.parameters()])
     
     seed_all(0)
@@ -954,7 +956,7 @@ if not load_results_Probit_nocstr :
     with torch.no_grad():
         theta_sample_prior = theta_sample.numpy()
 
-    with open(tirages_path, 'rb') as file:
+    with open(os.path.join(tirages_path, 'tirages_data'), 'rb') as file:
         data = pickle.load(file)
     data_A, data_Z = data[0], data[1]
     theta_true = np.array([3.37610525, 0.43304097])
@@ -994,6 +996,15 @@ else :
         MI, range_MI, lower_MI, upper_MI = MI_dic['values'], MI_dic['range'], MI_dic['lower'], MI_dic['upper']
         theta_sample_prior, jeffreys_sample, all_params = Prior['samples'], Prior['jeffreys'], Prior['params']
         theta_post_nocstr, jeffreys_post = Posterior['samples'], Posterior['jeffreys']    
+
+with torch.no_grad():
+    mult_w2 = NN.netbeta.singl.fc1.weight.detach().numpy()
+w2_neg = 1/mult_w2[mult_w2<0]
+w2_pos = 1/mult_w2[mult_w2>0]
+print('multiplicative weights on beta:')
+print('neagtives belong to [{},{}]'.format(w2_neg.min(), w2_neg.max()))
+print('positives belong to [{},{}]'.format(w2_pos.min(), w2_pos.max()))
+
 ```
 
 ```{python stem-plot}
@@ -1058,10 +1069,13 @@ name_file = 'Probit_results_constrained.pkl'
 file_path = os.path.join(path_plot, name_file)
 
 seed_all(0)
-NN = SingleLinear(input_size, output_size, m1=0, s1=0.1, b1=0, act1=nn.Identity())
-NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
-NN = AffineTransformation(NN, low, upp)
-VA = VA_NeuralNet(neural_net=NN, model=Probit)
+sqrt2 = np.sqrt(2)
+act_bet = lambda x: torch.log(1- 0.5*(1+torch.erf(x/sqrt2)) )
+NN_cst = NetProbitSeparate(input_size, m1=0, s1=1, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
+# NN = SingleLinear(input_size, output_size, m1=0, s1=0.1, b1=0, act1=nn.Identity())
+# NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
+# NN = AffineTransformation(NN, low, upp)
+VA = VA_NeuralNet(neural_net=NN_cst, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=0.5, use_log_lik=True)
 Constr = Constraints_NeuralNet(div=Div, betas=beta, b=b, T_cstr=T_cstr, 
@@ -1070,10 +1084,10 @@ Constr = Constraints_NeuralNet(div=Div, betas=beta, b=b, T_cstr=T_cstr,
 with torch.no_grad():
     theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
 
-num_epochs = 10000
+num_epochs = 100
 optimizer = torch_Adam
 num_samples_MI = 100
-freq_MI = 500
+freq_MI = 25
 save_best_param = False
 learning_rate = 0.0005
 freq_augm = 100
@@ -1082,11 +1096,13 @@ if not load_results_Probit_cstr :
 
     ### Training loop
     MI, constr_values, range_MI, lower_MI, upper_MI = Constr.Partial_autograd(J, N, eta, num_epochs, optimizer, num_samples_MI, 
-                                                            freq_MI, save_best_param, learning_rate, momentum=True,
+                                                            freq_MI, save_best_param, learning_rate, 
+                                                            num_samples_grad=40,
+                                                            momentum=True,
                                                             freq_augm=freq_augm, max_violation=0.005, update_eta_augm=2.)
 
     constr_values = torch.stack(constr_values).numpy()
-    all_params = torch.cat([param.view(-1) for param in NN.parameters()])
+    all_params = torch.cat([param.view(-1) for param in NN_cst.parameters()])
     seed_all(0)
     with torch.no_grad():
         theta_sample = Constr.va.implicit_prior_sampler(n_samples_prior).numpy()
@@ -1094,7 +1110,7 @@ if not load_results_Probit_cstr :
     print(f'Moment of order {beta.item()}, estimation : {np.mean(theta_sample**beta.item(),axis=0)}, wanted value : {b}')
 
     seed_all(0)
-    with open(tirages_path, 'rb') as file:
+    with open(os.path.join(tirages_path,'tirages_data'), 'rb') as file:
         data = pickle.load(file)
     data_A, data_Z = data[0], data[1]
     N = 50  # non-degenerate
@@ -1109,7 +1125,7 @@ if not load_results_Probit_cstr :
     sigma2_0 = torch.tensor(1.)
     eps_0 = torch.randn(p)
     eps_MH, batch_acc = VA.MH_posterior(eps_0, T_mcmc, sigma2_0, target_accept=0.4, adap=True, Cov=True, disable_tqdm=False)
-    theta_MH = NN(eps_MH)
+    theta_MH = NN_cst(eps_MH)
     with torch.no_grad():
         theta_MH = theta_MH.detach().numpy()
     theta_post_cstr = theta_MH[-n_samples_post:,-n_samples_post:]
@@ -1131,6 +1147,14 @@ else :
         MI, range_MI, lower_MI, upper_MI, constr_values = MI_dic['values'], MI_dic['range'], MI_dic['lower'], MI_dic['upper'], MI_dic['constr']
         theta_sample_prior, jeffreys_sample, all_params = Prior['samples'], Prior['jeffreys'], Prior['params']
         theta_post_cstr, jeffreys_post = Posterior['samples'], Posterior['jeffreys']
+
+with torch.no_grad():
+    mult_w2 = NN_cst.netbeta.singl.fc1.weight.detach().numpy()
+w2_neg = 1/mult_w2[mult_w2<0]
+w2_pos = 1/mult_w2[mult_w2>0]
+print('multiplicative weights on beta:')
+print('neagtives belong to [{},{}]'.format(w2_neg.min(), w2_neg.max()))
+print('positives belong to [{},{}]'.format(w2_pos.min(), w2_pos.max()))
 
 ```
 

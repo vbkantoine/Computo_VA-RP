@@ -29,6 +29,54 @@ class Scaled_Softplus(nn.Module):
 
 ############################## Simple architectures ##############################
 
+class NetProbitSeparate(nn.Module):
+    def __init__(self, input_size, m1, s1, b1, pre_act, act1):
+        super().__init__()
+        self.input_size = input_size
+        self.output_size = 2
+        self.mean1 = m1
+        self.std1 = s1
+        self.bias1 = b1
+        self.netalpaha = NetforProbitAlpha(input_size, m1, s1, b1, act1[0])
+        self.netbeta = NetforProbitBeta(input_size, m1, s1, b1, act1[1])
+        self.pre_act = pre_act
+
+    def forward(self, x) :
+        x0 = self.pre_act[0](x)
+        x1 = self.pre_act[1](x)
+        x0 = self.netalpaha(x0)
+        x1 = self.netbeta(x1)
+        # print(x1.shape)
+        # assert x1.shape == (x1.shape[0],1)
+        return torch.cat([x0,x1], -1)
+
+class PreActivation(nn.Module):
+    def __init__(self, act_functions):
+        super(PreActivation, self).__init__()
+        self.act_functions = act_functions
+        
+    def forward(self, x) :
+        y = []
+        for f in self.act_functions :
+            y.append(f(x))
+        return torch.concatenate(y)
+    
+class NetforProbitAlpha(nn.Module):
+    def __init__(self, input_size, m1, s1, b1, act1):
+        super().__init__()
+        self.singl = SingleLinear(input_size, 1, m1, s1, b1, act1)
+
+    def forward(self, x) :
+        return self.singl(x)
+    
+class NetforProbitBeta(nn.Module):
+    def __init__(self, input_size, m1, s1, b1, act1):
+        super().__init__()
+        self.singl = SingleLinear(input_size, 1, m1, s1, b1, act1)
+
+    def forward(self, x) :
+        return self.singl(x)
+
 class SingleLinear(nn.Module):
     def __init__(self, input_size, output_size, m1, s1, b1, act1):
         super(SingleLinear, self).__init__()
