@@ -673,6 +673,20 @@ class torch_ProbitModel():               # theta = (alpha,beta) in (R+*)^2 or th
         Returns:
             (N,J,2) tensor: Tensor containing all samples and is kept in the class
         """
+        if theta.dim() > 1 :
+            # consider using lognormal and set_beta is None
+            alpha = theta[:,0]
+            beta = theta[:,1]
+            m1 = torch.distributions.LogNormal(self.mu_a, self.sigma2_a)
+            a = m1.sample((theta.size()[0],N,J))
+            gamma = torch.log(a/alpha[:,None,None])/beta[:,None,None]
+            m2 = torch.distributions.Bernoulli(probs=self.Gauss_cdf(gamma))
+            Z = m2.sample()
+            D = torch.stack((Z,a), dim=-1).squeeze()
+            # D = torch.reshape(D, (N,J,2))
+            self.data = D
+            return D
+
         if self.set_beta is None :
             alpha, beta = theta[0], theta[1]
         else :
@@ -739,6 +753,16 @@ class torch_ProbitModel():               # theta = (alpha,beta) in (R+*)^2 or th
         Returns:
             J tensor : log-likelihood value for each N-sample in self.data at theta
         """
+        if theta.dim()>1 :
+            D = self.data
+            Z, a = D[:,:,:,0], D[:,:,:,1]    
+            alpha, beta = theta[:,0], theta[:,1]
+            Phi = self.Gauss_cdf(torch.log(a/alpha[:,None,None]) / beta[:,None,None])
+            #log_lik_lognormal = torch.sum(-torch.log(a) - (0.5*(torch.log(a)-self.mu_a)**2 / self.sigma2_a), dim=0)
+            log_lik_cond = torch.sum(Z*torch.log(Phi) + (1-Z)*torch.log(1-Phi), dim=1)
+            log_lik_1D = log_lik_cond #+ log_lik_lognormal 
+            return log_lik_1D
+
         D = self.data
         Z, a = D[:,:,0], D[:,:,1]
         if self.set_beta is None :
@@ -759,6 +783,13 @@ class torch_ProbitModel():               # theta = (alpha,beta) in (R+*)^2 or th
             (T,J) tensor : log-likelihood value for each N-sample in self.data at each theta in thetas
         """
         D = self.data
+        if D.dim()>3 :
+            Z, a = D[:,:,:,0], D[:,:,:,1]
+            alpha, beta = thetas[:,0], thetas[:,1]
+            Phi = self.Gauss_cdf(torch.log(a[:,None, :, :]/alpha[None,:, None, None]) / beta[None, :, None, None])
+            log_lik_cond = torch.sum(Z[:,None, :, :]*torch.log(Phi) + (1-Z[:,None, :, :])*torch.log(1-Phi), dim=2)
+            return log_lik_cond
+
         Z, a = D[:,:,0], D[:,:,1]
         if self.set_beta is None :
             alpha, beta = thetas[:,0], thetas[:,1]

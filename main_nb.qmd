@@ -102,10 +102,8 @@ def plot_frag_cred(theta_post, ax, color, label=None) :
     if not label is None :
         ax.plot(a_tab, q1, color=color, alpha=0.6, label=label)
     # ax.plot(a_tab, med)
+    ax.legend()
     return ax
-
-    
-
 
 
 
@@ -125,7 +123,7 @@ upp = 1 + low
 mu_a, sigma2_a = 0, 1
 #mu_a, sigma2_a = 8.7 * 10**-3, 1.03
 Probit = torch_ProbitModel(use_log_normal=True, mu_a=mu_a, sigma2_a=sigma2_a, set_beta=None, alt_scaling=True)
-n_samples_prior = 10**6
+n_samples_prior = 100
 alpha = 0.5
 name_file = 'Probit_results_unconstrained.pkl'
 file_path = os.path.join(path_plot, name_file)
@@ -140,13 +138,19 @@ VA = VA_NeuralNet(neural_net=NN, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=alpha, use_log_lik=True)
 with torch.no_grad():
-    theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
+    Thetas_ = Div.va.implicit_prior_sampler(n_samples_prior)
+    theta_sample_init = Thetas_.numpy()
+    Thetas_ = delete_nan_elements(Thetas_)
+    # MI_list = np.array([Div.MI(theta, J, N).item() for theta in Thetas_])
+    MI_list = Div.MI(Thetas_, J, N).numpy()
+    MI_list = remove_nan_and_inf(MI_list)
+    MI_current = np.mean(MI_list)
 
-num_epochs = 200
+num_epochs = 400
 loss_fct = "LB_MI"
 optimizer = torch_Adam
 num_samples_MI = 100
-freq_MI = 50
+freq_MI = 25
 save_best_param = True
 learning_rate = 0.001
 
@@ -229,6 +233,19 @@ plt.grid()
 #plt.yscale('log')
 plt.tight_layout()
 plt.show()
+
+print('MI fistr value: {}'.format(MI_current))
+# MI_list = np.concatenate( [Div.MI(torch.tensor(theta_post_nocstr[-100*(i+1):-100*(i)-1]), J, N).numpy()  for i in range(10)] ) 
+with torch.no_grad():
+    MI_list = Div.MI(torch.tensor(theta_post_nocstr[-100:]), J, N).numpy()
+#  MI_list = remove_nan_and_inf(MI_list)
+MI_last = np.nanmean(MI_list)
+print('MI last value: {}'.format(MI_last))
+
+plt.figure(figsize=(5, 4))
+plt.hist(theta_sample_init[:,1], density=True, bins="rice", color="red", label=r"Initial prior in $\beta$", alpha=0.4)
+plt.hist(theta_post_nocstr[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+plt.legend()
 
 
 ```
@@ -385,6 +402,12 @@ plt.grid()
 #plt.yscale('log')
 plt.tight_layout()
 plt.show()
+
+
+plt.figure(figsize=(5, 4))
+plt.hist(theta_sample_init[:,1], density=True, bins="rice", color="red", label=r"Initial prior in $\beta$", alpha=0.4)
+plt.hist(theta_post_cstr[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+
 ```
 
 

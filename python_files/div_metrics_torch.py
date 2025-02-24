@@ -46,7 +46,10 @@ class DivMetric_NeuralNet():
             if va.q == 1 :
                 theta_sample = theta_sample.squeeze()
             logs_lik = model.collec_log_lik(theta_sample)
-            ratio_lik = torch.mean(torch.exp(logs_lik - log_lik), dim=0)   
+            if theta.dim()>1 :
+                ratio_lik = torch.mean(torch.exp(logs_lik - log_lik[:,None]), dim=1)   
+            else :
+                ratio_lik = torch.mean(torch.exp(logs_lik - log_lik), dim=0)   
         else :
             marg = va.MC_marg(self.T)
             lik = model.likelihood(theta)
@@ -57,7 +60,10 @@ class DivMetric_NeuralNet():
             sommand = alpha_div(ratio_lik, self.alpha, c, d)
         else:
             sommand = - torch.log(ratio_lik)
-        return torch.mean(sommand) - d
+        if theta.dim()>1 :
+            return torch.mean(sommand, 1) - d
+        else :
+            return torch.mean(sommand, 0) - d
  
     def grad_MI(self, theta, J, N, grad_tensor):  
         """ Estimates by Monte-Carlo the gradient of the inner expectancy in the mutual information.
@@ -299,7 +305,7 @@ class DivMetric_NeuralNet():
             True_grad = torch.mean(Collec_grad, dim=1)
             with torch.no_grad() :
                 # param_norm_grad = torch.Tensor([param for param in net.parameters()])
-                True_grad += 0.01*all_params
+                True_grad += 1*all_params
             #print(f'True grad = {True_grad}')
             # Update parameters using true gradients
             index = 0
@@ -329,7 +335,8 @@ class DivMetric_NeuralNet():
                     Thetas = self.va.implicit_prior_sampler(num_samples_MI)
                     Thetas = delete_nan_elements(Thetas)
                     #print(Thetas)
-                    MI_list = np.array([self.MI(theta, J, N).item() for theta in Thetas])
+                    # MI_list = np.array([self.MI(theta, J, N).item() for theta in Thetas])
+                    MI_list = self.MI(Thetas, J, N).numpy()
                     MI_list = remove_nan_and_inf(MI_list)
                     MI_current = np.mean(MI_list)
                     MI.append(MI_current)
