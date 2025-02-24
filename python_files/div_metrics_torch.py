@@ -299,7 +299,7 @@ class DivMetric_NeuralNet():
             True_grad = torch.mean(Collec_grad, dim=1)
             with torch.no_grad() :
                 # param_norm_grad = torch.Tensor([param for param in net.parameters()])
-                True_grad += all_params
+                True_grad += 0.01*all_params
             #print(f'True grad = {True_grad}')
             # Update parameters using true gradients
             index = 0
