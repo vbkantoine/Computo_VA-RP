@@ -10,6 +10,7 @@ import numpy as np
 import scipy
 import torch
 from tqdm import tqdm
+import numba
 
     
 ####################  Divergence Metrics (Torch)  ####################
@@ -24,8 +25,24 @@ class DivMetric_NeuralNet():
         self.T = T        # number of MC samples for the marginal / to approximate the MLE
         self.use_log_lik = use_log_lik  # computations made with log-likelihood instead
         self.use_baseline = use_baseline
+        self.penalize_norm_param = 0
 
     # The following functions are all noisy, ie one sample only instead of the outer expectation
+
+    # def MI_numb(self, theta, J, N) :
+    #     D = self.model.sample(theta, N, J)
+    #     @numba.jit
+    #     def MI_n(theta=theta, D=D, N=N, J=J, log_lik_num=self.model.log_lik_numba) :
+    #         sommand = np.zeros(theta.shape[0])
+    #         log_lik = log_lik_num(theta)
+    #         theta_sample = va.implicit_prior_sampler(self.T)
+    #         if va.q == 1 :
+    #             theta_sample = theta_sample.squeeze()
+    #         logs_lik = np.zeros((theta.shape[0]))
+    #         logs_lik = model.collec_log_lik(theta_sample)
+    #         ratio_lik = torch.mean(torch.exp(logs_lik - log_lik[:,None]), dim=1)   
+            
+    #     return MI_n()
 
     def MI(self, theta, J, N):   
         """ Estimates by Monte-Carlo the inner expectancy in the mutual information.
@@ -36,6 +53,26 @@ class DivMetric_NeuralNet():
         Returns:
             tensor (size 1): Result of the estimation from the data samples
         """
+        # if theta.dim()>1 :
+        #     model = self.model
+        #     va = self.va
+        #     D = model.sample(theta, N, J)
+        #     d = 0.
+        #     if self.use_log_lik :
+        #         log_lik = model.log_likelihood(theta).numpy()
+        #         theta_sample = va.implicit_prior_sampler(self.T)
+        #         if va.q == 1 :
+        #             theta_sample = theta_sample.squeeze()
+        #         logs_lik = model.collec_log_lik_numb(theta_sample.numpy())
+        #         if theta.dim()>1 :
+        #             ratio_lik = np.mean(np.exp(logs_lik - log_lik[:,None]), axis=1)   
+        #         else :
+        #             ratio_lik = np.mean(np.exp(logs_lik - log_lik), axis=0)
+        #     c = 1 / (self.alpha - 1)
+        #     d = c / self.alpha
+        #     sommand = alpha_div(ratio_lik, self.alpha, c, d)
+        #     return np.mean(sommand, 1) - d
+
         model = self.model
         va = self.va
         D = model.sample(theta, N, J)
@@ -305,7 +342,7 @@ class DivMetric_NeuralNet():
             True_grad = torch.mean(Collec_grad, dim=1)
             with torch.no_grad() :
                 # param_norm_grad = torch.Tensor([param for param in net.parameters()])
-                True_grad += 1*all_params
+                True_grad += self.penalize_norm_param*all_params
             #print(f'True grad = {True_grad}')
             # Update parameters using true gradients
             index = 0
@@ -337,8 +374,8 @@ class DivMetric_NeuralNet():
                     #print(Thetas)
                     # MI_list = np.array([self.MI(theta, J, N).item() for theta in Thetas])
                     MI_list = self.MI(Thetas, J, N).numpy()
-                    MI_list = remove_nan_and_inf(MI_list)
-                    MI_current = np.mean(MI_list)
+                    # MI_list = remove_nan_and_inf(MI_list)
+                    MI_current = np.nanmean(MI_list)
                     MI.append(MI_current)
                     if keep_all_MI_vals : 
                         all_MI_vals.append(MI_list)

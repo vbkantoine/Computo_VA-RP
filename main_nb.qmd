@@ -39,7 +39,9 @@ jupyter: python3
 ```{python python-code}
 import os
 import sys
-base_dir = r'C:\Users\AV273338\Documents\GitHub\Computo_VA-RP'  # the path must be set on VA-RP
+# base_dir = r'C:\Users\AV273338\Documents\GitHub\Computo_VA-RP'  # the path 
+base_dir = r'/Users/antoinevanbiesbroeck/Documents/GitHub/Nils/Computo_VA-RP'
+# {must be set on VA-RP
 py_dir = os.path.join(base_dir, "python_files")
 if py_dir not in sys.path:
     sys.path.append(py_dir)
@@ -75,7 +77,7 @@ varp_probit_path = os.path.join(probit_path, "Multiseed_VARP")
 # If False, all computations will be done and saved (and possibly overwrite the data files !)
 
 
-load_results_Probit_nocstr = True
+load_results_Probit_nocstr = False
 load_results_Probit_cstr = False
 
 
@@ -123,7 +125,7 @@ upp = 1 + low
 mu_a, sigma2_a = 0, 1
 #mu_a, sigma2_a = 8.7 * 10**-3, 1.03
 Probit = torch_ProbitModel(use_log_normal=True, mu_a=mu_a, sigma2_a=sigma2_a, set_beta=None, alt_scaling=True)
-n_samples_prior = 100
+n_samples_prior = 10**6
 alpha = 0.5
 name_file = 'Probit_results_unconstrained.pkl'
 file_path = os.path.join(path_plot, name_file)
@@ -137,10 +139,11 @@ NN = NetProbitSeparate(input_size, m1=0, s1=0.1, b1=0, pre_act=[nn.Identity(), a
 VA = VA_NeuralNet(neural_net=NN, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=alpha, use_log_lik=True)
+Div.penalize_norm_param=0.1
 with torch.no_grad():
     Thetas_ = Div.va.implicit_prior_sampler(n_samples_prior)
     theta_sample_init = Thetas_.numpy()
-    Thetas_ = delete_nan_elements(Thetas_)
+    Thetas_ = delete_nan_elements(Thetas_[-100:])
     # MI_list = np.array([Div.MI(theta, J, N).item() for theta in Thetas_])
     MI_list = Div.MI(Thetas_, J, N).numpy()
     MI_list = remove_nan_and_inf(MI_list)
@@ -150,7 +153,7 @@ num_epochs = 400
 loss_fct = "LB_MI"
 optimizer = torch_Adam
 num_samples_MI = 100
-freq_MI = 25
+freq_MI = 10
 save_best_param = True
 learning_rate = 0.001
 
@@ -158,6 +161,10 @@ if not load_results_Probit_nocstr :
     MI, range_MI, lower_MI, upper_MI = Div.Partial_autograd(J, N, num_epochs, loss_fct, optimizer, num_samples_MI, 
                                                             freq_MI, save_best_param, learning_rate,num_samples_grad=40, momentum=True)
     all_params = torch.cat([param.view(-1) for param in NN.parameters()])
+
+    # with torch.no_grad() :
+    #     NN.netbeta.singl.fc1.weight[0,0] += -NN.netbeta.singl.fc1.weight[0,0] +1/0.1
+    #     NN.netbeta.singl.fc1.weight[0,1] += -NN.netbeta.singl.fc1.weight[0,1] +4
     
     seed_all(0)
     theta_sample = Div.va.implicit_prior_sampler(n_samples_prior)
@@ -244,9 +251,9 @@ print('MI last value: {}'.format(MI_last))
 
 plt.figure(figsize=(5, 4))
 plt.hist(theta_sample_init[:,1], density=True, bins="rice", color="red", label=r"Initial prior in $\beta$", alpha=0.4)
-plt.hist(theta_post_nocstr[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+plt.hist(theta_sample_prior[:,1][theta_sample_prior[:,1]<50], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
 plt.legend()
-
+plt.xlim(0,10)
 
 ```
 
@@ -296,7 +303,7 @@ file_path = os.path.join(path_plot, name_file)
 seed_all(0)
 sqrt2 = np.sqrt(2)
 act_bet = lambda x: torch.log(1- 0.5*(1+torch.erf(x/sqrt2)) )
-NN_cst = NetProbitSeparate(input_size, m1=0, s1=1, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
+NN_cst = NetProbitSeparate(input_size, m1=0, s1=0.1, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
 # NN = SingleLinear(input_size, output_size, m1=0, s1=0.1, b1=0, act1=nn.Identity())
 # NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
 # NN = AffineTransformation(NN, low, upp)
@@ -305,17 +312,18 @@ VA = VA_NeuralNet(neural_net=NN_cst, model=Probit)
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=0.5, use_log_lik=True)
 Constr = Constraints_NeuralNet(div=Div, betas=beta, b=b, T_cstr=T_cstr, 
                                objective='LB_MI', lag_method='augmented', eta_augm=eta_augm, rule='SGD')
+Div.penalize_norm_param = 0
 
 with torch.no_grad():
     theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
 
-num_epochs = 200
+num_epochs = 170
 optimizer = torch_Adam
 num_samples_MI = 100
-freq_MI = 25
+freq_MI = 10
 save_best_param = False
-learning_rate = 0.0005
-freq_augm = 100
+learning_rate = 0.001
+freq_augm = 10
 
 if not load_results_Probit_cstr :
 
@@ -406,7 +414,7 @@ plt.show()
 
 plt.figure(figsize=(5, 4))
 plt.hist(theta_sample_init[:,1], density=True, bins="rice", color="red", label=r"Initial prior in $\beta$", alpha=0.4)
-plt.hist(theta_post_cstr[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+plt.hist(theta_sample_prior[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
 
 ```
 
@@ -498,7 +506,7 @@ plt.show()
 fig = plt.figure(figsize=(4,3))
 ax = fig.add_subplot(111)
 
-plot_frag_cred(theta_post_nocstr, ax, 'red', label='VA-RP')
+plot_frag_cred(theta_post_cstr, ax, 'red', label='VA-RP')
 plot_frag_cred(theta_J, ax, 'blue', label='AJ')
 
 

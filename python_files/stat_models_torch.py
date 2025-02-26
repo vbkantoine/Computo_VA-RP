@@ -6,7 +6,35 @@ import numpy as np
 import torch
 import math
 import pandas
+import numba
+import math
+# import spycial
 
+@numba.jit(nopython=True, cache=True)
+def num_Phi(x_arr) : #2vars
+    # res = np.zeros_like(x_arr)
+    # twos = np.sqrt(2)
+    # for i in prange(x_arr.shape[0]) :
+    #     for j in range(x_arr.shape[1]) :
+    #         res[i,j] = 1/2 * (1+math.erf(x_arr[i,j]/twos)) 
+    # return res
+    # def erf(x):
+    # save the sign of x
+    sign = -1*(x_arr<0) #1 if x >= 0 else -1
+    x = np.abs(x_arr)
+
+    # constants
+    a1 =  0.254829592
+    a2 = -0.284496736
+    a3 =  1.421413741
+    a4 = -1.453152027
+    a5 =  1.061405429
+    p  =  0.3275911
+
+    # A&S formula 7.1.26
+    t = 1.0/(1.0 + p*x)
+    y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*np.exp(-x*x)
+    return sign*y
 
 ##############################  Statistical models (Torch)  ##############################
 # Every float (in numpy file) in argument is replaced by a torch tensor of size one
@@ -774,6 +802,20 @@ class torch_ProbitModel():               # theta = (alpha,beta) in (R+*)^2 or th
         log_lik_cond = torch.sum(Z*torch.log(Phi) + (1-Z)*torch.log(1-Phi), dim=0)
         log_lik_1D = log_lik_cond #+ log_lik_lognormal  
         return log_lik_1D
+
+    def collec_log_lik_numb(self, theta) :
+        D = self.data.numpy()
+        T = theta.shape[0]
+        J = D.shape[2]
+        N = D.shape[1]
+        @numba.jit(parallel=True)
+        def collec(theta, D, T, J, N) :
+            lik_cond = np.zeros((D.shape[0],T,J))
+            for i in range(N) :
+                lik_cond += np.log( (1-np.expand_dims(D[:,i,:,0],1))+ (2*np.expand_dims(D[:,i,:,0],1)-1)*( 1/2+1/2*num_Phi(np.log(np.expand_dims(D[:,i,:,1],1)/np.expand_dims(np.expand_dims(theta[:,0], 0), -1))/np.expand_dims(np.expand_dims(theta[:,1],0), -1))) )
+                # lik_cond[i] *=  1/2+1/2*math.erf(np.log(D[:,:,:,0]/theta[i,0])/theta[i,1])
+            return lik_cond
+        return collec(theta, D, T, J, N)
 
     def collec_log_lik(self, thetas):
         """ Computes the log-likelihood for several theta values
