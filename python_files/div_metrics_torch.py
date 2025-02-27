@@ -26,6 +26,8 @@ class DivMetric_NeuralNet():
         self.use_log_lik = use_log_lik  # computations made with log-likelihood instead
         self.use_baseline = use_baseline
         self.penalize_norm_param = 0
+        self.save_params = False
+        self.keep_params = {}
 
     # The following functions are all noisy, ie one sample only instead of the outer expectation
 
@@ -285,6 +287,7 @@ class DivMetric_NeuralNet():
         lower_MI = []
         sum_entropy = []
         norm_param = []
+        params = {'w1':[], 'w2':[], 'b1':[], 'b2':[]}
         best_model_params = None
         best_MI = -np.inf
         best_epoch = 0
@@ -393,6 +396,14 @@ class DivMetric_NeuralNet():
                             best_MI = MI_current
                             best_model_params = {k: v.clone() for k, v in net.state_dict().items()}
                             best_epoch = epoch
+
+                    if self.save_params:
+                        params['w2'].append(net.netbeta.singl.fc1.weight.detach().numpy()) 
+                        params['w1'].append(net.netalpaha.singl.fc1.weight.detach().numpy()) 
+                        params['b1'].append(net.netalpaha.singl.fc1.bias.detach().numpy())
+                        params['b2'].append(net.netbeta.singl.fc1.bias.detach().numpy())
+
+        self.keep_params = params
         if save_best_param and best_model_params is not None:
             net.load_state_dict(best_model_params)
         #print('Training done!')

@@ -25,6 +25,10 @@ def has_nan_params(neural_net):
             return True
     return False
 
+def delete_infs(tensor) :
+    mask = torch.isfinite(tensor)
+    return tensor[mask]
+
 def assign_parameters_to_NN(NN, all_params):
     start_idx = 0
     for param in NN.parameters():

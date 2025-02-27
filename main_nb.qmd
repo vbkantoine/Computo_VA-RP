@@ -77,7 +77,7 @@ varp_probit_path = os.path.join(probit_path, "Multiseed_VARP")
 # If False, all computations will be done and saved (and possibly overwrite the data files !)
 
 
-load_results_Probit_nocstr = False
+load_results_Probit_nocstr = True
 load_results_Probit_cstr = False
 
 
@@ -115,7 +115,7 @@ def plot_frag_cred(theta_post, ax, color, label=None) :
 #Parameters and classes
 p = 50   
 q = 2      
-N = 500     
+N = 50     
 J = 500   
 T = 50     
 input_size = p  
@@ -140,6 +140,8 @@ VA = VA_NeuralNet(neural_net=NN, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=alpha, use_log_lik=True)
 Div.penalize_norm_param=0.1
+Div.save_params = True
+
 with torch.no_grad():
     Thetas_ = Div.va.implicit_prior_sampler(n_samples_prior)
     theta_sample_init = Thetas_.numpy()
@@ -149,12 +151,12 @@ with torch.no_grad():
     MI_list = remove_nan_and_inf(MI_list)
     MI_current = np.mean(MI_list)
 
-num_epochs = 400
+num_epochs = 2000
 loss_fct = "LB_MI"
 optimizer = torch_Adam
-num_samples_MI = 100
+num_samples_MI = 10
 freq_MI = 10
-save_best_param = True
+save_best_param = False
 learning_rate = 0.001
 
 if not load_results_Probit_nocstr : 
@@ -201,6 +203,9 @@ if not load_results_Probit_nocstr :
     Probit_results_nocstr = {'MI' : Mutual_Info, 'prior' : Prior, 'post' : Posterior}
     with open(file_path, 'wb') as file:
         pickle.dump(Probit_results_nocstr, file)
+
+
+    torch.save(NN.state_dict(),   os.path.join(path_plot, 'Probit_results_unconstrained_torch_state'))
     
 else :
     with open(file_path, 'rb') as file:
@@ -255,6 +260,21 @@ plt.hist(theta_sample_prior[:,1][theta_sample_prior[:,1]<50], density=True, bins
 plt.legend()
 plt.xlim(0,10)
 
+
+target_w1 = lambda w1: np.linalg.norm(w1, axis=-1)-1
+target_b1 = lambda b1: np.abs(b1)
+target_w2_1 = lambda w2: np.max(1/w2 -1e10*(w2>0), axis=-1)
+target_w2_2 = lambda w2: np.min(1/w2 +1e10*(w2<0), axis=-1)
+plt.figure(figsize=(5, 4))
+plt.plot(range_MI, target_w1(np.array(Div.keep_params['w1']).squeeze()), label=r'$\|w_1\|_2-1$')
+plt.plot(range_MI, target_b1(Div.keep_params['b1']), label=r'$|b_1|$')
+plt.plot(range_MI, target_w2_1(np.array(Div.keep_params['w2']).squeeze()), label=r'$\max(w_2^{-1}<0)$')
+plt.plot(range_MI, target_w2_2(np.array(Div.keep_params['w2']).squeeze()), label=r'$\min(w_2^{-1}>0)$')
+
+plt.legend()
+
+
+
 ```
 
 In @fig-probit_mi is shown the evolution of the mutual information through the optimization of the VA-RP for the probit model. 
@@ -267,17 +287,17 @@ We perceive high mutual information values at the initialization, which we inter
 
 
 ```{python python-code}
-kappa = 1/8
-K_val = np.mean((theta_sample_prior[:,1]**kappa)**(1/alpha))
-c_val = np.mean((theta_sample_prior[:,1]**kappa)**(1+1/alpha))
+kappa = 0.15
+K_val = np.nanmean((theta_sample_prior[:,1]**kappa)**(1/alpha))
+c_val = np.nanmean((theta_sample_prior[:,1]**kappa)**(1+1/alpha))
 constr_val = 0.839594841003418
 alpha_constr = np.mean((theta_sample_prior[:,0]**-kappa + 1)**-1)
-#print(f'Constraint value estimation : {constr_val}')  # = 0.839594841003418 
+print(f'Constraint value estimation : {K_val/c_val}')  # = 0.839594841003418 
 
 # Parameters and classes
 p = 50     # latent space dimension
 q = 2      # parameter space dimension
-N = 500    # number of data samples
+N = 50    # number of data samples
 J = 500    # nb samples for MC estimation in MI
 T = 50     # nb samples MC marginal likelihood
 alpha = 0.5
@@ -293,8 +313,8 @@ Probit = torch_ProbitModel(use_log_normal=True, mu_a=mu_a, sigma2_a=sigma2_a, se
 
 # Constraints
 beta = torch.tensor([kappa])
-b = torch.tensor([[alpha_constr,constr_val]]) 
-T_cstr = 100000
+b = torch.tensor([[1,constr_val]]) 
+T_cstr = 10000
 eta_augm = torch.tensor([[0.,1.]])
 eta = torch.tensor([[0.,1.]])
 name_file = 'Probit_results_constrained.pkl'
@@ -312,14 +332,15 @@ VA = VA_NeuralNet(neural_net=NN_cst, model=Probit)
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=0.5, use_log_lik=True)
 Constr = Constraints_NeuralNet(div=Div, betas=beta, b=b, T_cstr=T_cstr, 
                                objective='LB_MI', lag_method='augmented', eta_augm=eta_augm, rule='SGD')
-Div.penalize_norm_param = 0
+Constr.penalize_norm_param = 0
+Constr.save_params = True
 
 with torch.no_grad():
     theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
 
-num_epochs = 170
+num_epochs = 400
 optimizer = torch_Adam
-num_samples_MI = 100
+num_samples_MI = 10
 freq_MI = 10
 save_best_param = False
 learning_rate = 0.001
@@ -370,6 +391,8 @@ if not load_results_Probit_cstr :
     Probit_results_cstr = {'MI' : Mutual_Info, 'prior' : Prior, 'post' : Posterior}
     with open(file_path, 'wb') as file:
         pickle.dump(Probit_results_cstr, file)
+
+    torch.save(NN_cst.state_dict(),   os.path.join(path_plot, 'Probit_results_constrained_torch_state'))
     
 else :
     with open(file_path, 'rb') as file:
@@ -414,7 +437,23 @@ plt.show()
 
 plt.figure(figsize=(5, 4))
 plt.hist(theta_sample_init[:,1], density=True, bins="rice", color="red", label=r"Initial prior in $\beta$", alpha=0.4)
-plt.hist(theta_sample_prior[:,1], density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+plt.hist(remove_nan_and_inf(theta_sample_prior[:,1]), density=True, bins="rice", label=r"Fitted prior", alpha=0.4)
+
+
+
+
+
+target_w1 = lambda w1: np.linalg.norm(w1, axis=-1)-1
+target_b1 = lambda b1: np.abs(b1)
+target_w2_1 = lambda w2: np.max(1/w2 -1e10*(w2>0), axis=-1)
+target_w2_2 = lambda w2: np.min(1/w2 +1e10*(w2<0), axis=-1)
+plt.figure(figsize=(5, 4))
+plt.plot(range_MI, target_w1(np.array(Constr.keep_params['w1']).squeeze()), label=r'$\|w_1\|_2-1$')
+plt.plot(range_MI, target_b1(Constr.keep_params['b1']), label=r'$|b_1|$')
+plt.plot(range_MI, target_w2_1(np.array(Constr.keep_params['w2']).squeeze()), label=r'$\max(w_2^{-1}<0)$')
+plt.plot(range_MI, target_w2_2(np.array(Constr.keep_params['w2']).squeeze()), label=r'$\min(w_2^{-1}>0)$')
+
+plt.legend()
 
 ```
 
@@ -506,7 +545,7 @@ plt.show()
 fig = plt.figure(figsize=(4,3))
 ax = fig.add_subplot(111)
 
-plot_frag_cred(theta_post_cstr, ax, 'red', label='VA-RP')
+plot_frag_cred(theta_post_nocstr, ax, 'red', label='VA-RP')
 plot_frag_cred(theta_J, ax, 'blue', label='AJ')
 
 
