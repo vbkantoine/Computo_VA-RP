@@ -151,7 +151,7 @@ with torch.no_grad():
     MI_list = remove_nan_and_inf(MI_list)
     MI_current = np.mean(MI_list)
 
-num_epochs = 1000
+num_epochs = 7000
 loss_fct = "LB_MI"
 optimizer = torch_Adam
 num_samples_MI = 10
@@ -186,7 +186,7 @@ if not load_results_Probit_nocstr :
     D = X.unsqueeze(1)
     Probit.data = D
     n_samples_post = 5000
-    T_mcmc = 5*10**4 + 1 
+    T_mcmc = 10**5 + 1 
     sigma2_0 = torch.tensor(1.)
     eps_0 = torch.randn(p)
     #eps_0 = 10 * torch.ones(p)
@@ -197,7 +197,7 @@ if not load_results_Probit_nocstr :
     theta_post_nocstr = theta_MH[-n_samples_post:,-n_samples_post:]
     
     # Saves all relevant quantities
-    Mutual_Info = {'values' : MI, 'range' : range_MI, 'lower' : lower_MI, 'upper' : upper_MI}
+    Mutual_Info = {'values' : MI, 'range' : range_MI, 'lower' : lower_MI, 'upper' : upper_MI, 'weights':Div.keep_params}
     Prior = {'samples' : theta_sample_prior, 'jeffreys' : None, 'params' : all_params}
     Posterior = {'samples' : theta_post_nocstr, 'jeffreys' : None}
     Probit_results_nocstr = {'MI' : Mutual_Info, 'prior' : Prior, 'post' : Posterior}
@@ -216,6 +216,7 @@ else :
         MI, range_MI, lower_MI, upper_MI = MI_dic['values'], MI_dic['range'], MI_dic['lower'], MI_dic['upper']
         theta_sample_prior, jeffreys_sample, all_params = Prior['samples'], Prior['jeffreys'], Prior['params']
         theta_post_nocstr, jeffreys_post = Posterior['samples'], Posterior['jeffreys']    
+        weights_hist = MI_dic['weights']
 
 with torch.no_grad():
     mult_w2 = NN.netbeta.singl.fc1.weight.detach().numpy()
@@ -266,10 +267,10 @@ target_b1 = lambda b1: np.abs(b1)
 target_w2_1 = lambda w2: np.max(1/w2 -1e10*(w2>0), axis=-1)
 target_w2_2 = lambda w2: np.min(1/w2 +1e10*(w2<0), axis=-1)
 plt.figure(figsize=(5, 4))
-plt.plot(range_MI, target_w1(np.array(Div.keep_params['w1']).squeeze()), label=r'$\|w_1\|_2-1$')
-plt.plot(range_MI, target_b1(Div.keep_params['b1']), label=r'$|b_1|$')
-plt.plot(range_MI, target_w2_1(np.array(Div.keep_params['w2']).squeeze()), label=r'$\max(w_2^{-1}<0)$')
-plt.plot(range_MI, target_w2_2(np.array(Div.keep_params['w2']).squeeze()), label=r'$\min(w_2^{-1}>0)$')
+plt.plot(range_MI, target_w1(np.array(weights_hist['w1']).squeeze()), label=r'$\|w_1\|_2-1$')
+plt.plot(range_MI, target_b1(weights_hist['b1']), label=r'$|b_1|$')
+plt.plot(range_MI, target_w2_1(np.array(weights_hist['w2']).squeeze()), label=r'$\max(w_2^{-1}<0)$')
+plt.plot(range_MI, target_w2_2(np.array(weights_hist['w2']).squeeze()), label=r'$\min(w_2^{-1}>0)$')
 
 plt.legend()
 

@@ -344,7 +344,7 @@ def errors_q(theta, ks_, a_tab=data.a_tab, ref_curve=ref_curve, conf=0.05, trans
     err_med_q1 = err_med_cond_q1.mean(-1)
     err_med_q2 = err_med_cond_q2.mean(-1)
 
-    return {'err_q1':err_med_q1, 'err_q2':err_med_q2}
+    return {'err_q1':err_med_q1, 'err_q2':err_med_q2, 'err_cond_q1':err_med_cond_q1, 'err_cond_q2':err_med_cond_q2}
 
 
 

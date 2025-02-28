@@ -86,6 +86,23 @@ def plots_med_tube_L2U(errors, ks_, name, ax=None, color='blue', varia_conf=0.05
     ax.legend()
 
 
+def plots_med_q2(errors, ks_, name, ax=None, color='blue', varia_conf=0.05, transfo_i=lambda x:x, a_max=1) :
+
+    err_med_cond = errors['err_cond_q1']/a_max
+    q1 = np.quantile(err_med_cond, varia_conf/2, axis=-1)
+    q2 = np.quantile(err_med_cond, 1-varia_conf/2, axis=-1)
+
+
+    ax.fill_between(ks_, q1, q2, color=color, alpha=0.6)
+    ax.plot(ks_, err_med_cond.mean(-1), linestyle=(0, (5, 1)), color=color, label=name, alpha=0.45)
+    # axes[0].plot(ks_, variations_dict['quant2_conf_zone'], '--', color=color)
+    ax.set_xlabel('Number of data')
+    ax.set_ylabel('error')
+    ax.set_yscale('log')
+    ax.set_title(r'${}$ confidence for'.format(varia_conf)+r' bias error $||m(P_{\theta})-P_{ref}||_{L^2}^2]$')
+    ax.legend()
+
+
 def plot_cred_ok(cred_arr, ks_, name, conf=0.05, color="blue", ax=None, transfo_i=lambda x:x, quant=False) :
     if ax is None :
         fig = plt.figure()
@@ -104,7 +121,7 @@ def plot_cred_ok(cred_arr, ks_, name, conf=0.05, color="blue", ax=None, transfo_
 if __name__=="__main__" :
     ks_ = np.arange(1,26)*10
     # path_save = r"./Runs_linear/"
-    path_saved_runs = r'/Users/antoinevanbiesbroeck/Documents/data_ran/SUR_alph_imp/mnt/beegfs/workdir/antoine.van-biesbroeck/results_SUR_bin_alpha_impact'
+    path_saved_runs = directory
 
     from bayes_frag.data import Data
     from bayes_frag.reference_curves import Reference_saved_MLE
@@ -132,63 +149,78 @@ if __name__=="__main__" :
         ref._compute_MC_data_tab()
         return ref
 
-    def generic_err_fig(IM, ax, err_num=3, err_name='quad_tube_', err_name_post='_U', func_plot=plot_quad_tubes, mean_name='mean_quad', tube1_name='quant1_quad', tube2_name='quant2_quad', to_divide=1) :
+    def generic_err_fig(IM, ax, err_num=3, a_s='a', err_name='quad_tube_', err_name_post='_U', func_plot=plot_quad_tubes, mean_name='mean_quad', tube1_name='quant1_quad', tube2_name='quant2_quad', to_divide=1) :
 
         # IM = 'PGA'
 
         n_fold = 41 if IM=='PGA' else 42
 
-        folds_son = lambda g : 'M-G{}-ASG_SUR_bin_{}-(1-26)_{}'.format(g, IM, n_fold)
+        folds_son = lambda g : 'run_AJ'.format(g, IM, n_fold)
 
         u = 0 # which take as n_s_J
 
-        color_g = ['red']*9 + ['orange']
+        color_g = ['red']*9 + ['blue']
         g_labels = {0:r'$\gamma=0$', 1.9:r'$\gamma=1.9$'}
+        label_AJ = 'AJ'
+        label_VARP = 'VARP'
+        if a_s=='a' :
+            label_AJ+= 'constr.'
+            label_VARP += 'constr.'
 
         # 1: plot l'err quadra: tout les gamma
-        g_tab = (np.arange(10)*2+1)/10
+        g_tab = [0.3]
         errors_3 = []
         err_quad_tube1 = []
         err_quad_tube2 = []
-        for i,gamma in enumerate(g_tab) :
+        for i,gamma in enumerate(g_tab) : # ajoute _sJ (VARP)
             errors_3.append(pickle.load(open(os.path.join(path_saved_runs, folds_son(gamma), 'errors_new_newL2_{}'.format(err_num)), 'rb')))
             if tube1_name is None :
-                err_med_cond = errors_3[-1][err_name+'s_Ja'+err_name_post][tube2_name]/to_divide
+                err_med_cond = errors_3[-1][err_name+'s_J'+a_s+err_name_post][tube2_name]/to_divide
                 err_quad_tube1.append(np.quantile(err_med_cond, 0.05/2, axis=-1))
                 err_quad_tube2.append(np.quantile(err_med_cond, 1-0.05/2, axis=-1))
             else :
-                err_quad_tube1.append(errors_3[-1][err_name+'s_Ja'+err_name_post][tube1_name])
-                err_quad_tube2.append(errors_3[-1][err_name+'s_Ja'+err_name_post][tube2_name])
-        #gmma = 0
-        if tube1_name is None :
-            err_med_cond = errors_3[u][err_name+'s_J'+err_name_post][tube2_name]/to_divide
-            err_quad_tube1.append(np.quantile(err_med_cond, 0.05/2, axis=-1))
-            err_quad_tube2.append(np.quantile(err_med_cond, 1-0.05/2, axis=-1))
-        else :
-            err_quad_tube1.append(errors_3[u][err_name+'s_J'+err_name_post][tube1_name])
-            err_quad_tube2.append(errors_3[u][err_name+'s_J'+err_name_post][tube2_name])
-        err_quad_tube1 = np.array(err_quad_tube1)
-        err_quad_tube2 = np.array(err_quad_tube2)
+                err_quad_tube1.append(errors_3[-1][err_name+'s_J'+a_s+err_name_post][tube1_name])
+                err_quad_tube2.append(errors_3[-1][err_name+'s_J'+a_s+err_name_post][tube2_name])
+        #gmma = 0 (cancel)
+        # if tube1_name is None : # on aimerait ajouter _nJ (AJ)
+        #     err_med_cond = errors_3[u][err_name+'n_J'+a_s+err_name_post][tube2_name]/to_divide
+        #     err_quad_tube1.append(np.quantile(err_med_cond, 0.05/2, axis=-1))
+        #     err_quad_tube2.append(np.quantile(err_med_cond, 1-0.05/2, axis=-1))
+        # else :
+        #     err_quad_tube1.append(errors_3[u][err_name+'n_J'+a_s+err_name_post][tube1_name])
+        #     err_quad_tube2.append(errors_3[u][err_name+'n_J'+a_s+err_name_post][tube2_name])
+        # err_quad_tube1 = np.array(err_quad_tube1)
+        # err_quad_tube2 = np.array(err_quad_tube2)
 
-        if to_divide!=1 :
-            func_plot(errors_3[u][err_name+'n_J'+err_name_post], ks_, 'standard', ax=ax, a_max=to_divide)
+        if to_divide!=1 : #plot nJ
+            func_plot(errors_3[u][err_name+'n_J'+a_s+err_name_post], ks_, label_AJ, ax=ax, a_max=to_divide)
         else :
             try :
-                func_plot(errors_3[u][err_name+'n_J'+err_name_post], ks_, 'standard', ax=ax)
+                func_plot(errors_3[u][err_name+'n_J'+a_s+err_name_post], ks_, label_AJ, ax=ax)
             except :
                 figtemp = plt.figure()
                 ax2 = figtemp.add_subplot()
-                func_plot(errors_3[u][err_name+'n_J'+err_name_post], ks_, 'standard', axes=[ax,ax2])
+                func_plot(errors_3[u][err_name+'n_J'+a_s+err_name_post], ks_, label_AJ, axes=[ax,ax2])
                 plt.close(figtemp)
 
-        ax.fill_between(ks_, np.maximum(np.max(err_quad_tube1, axis=0), np.max(err_quad_tube2, axis=0) ), np.minimum(np.min(err_quad_tube1, axis=0), np.min(err_quad_tube2, axis=0) ), color='red', alpha=0.45 )
+        # ax.fill_between(ks_, np.maximum(np.max(err_quad_tube1, axis=0), np.max(err_quad_tube2, axis=0) ), np.minimum(np.min(err_quad_tube1, axis=0), np.min(err_quad_tube2, axis=0) ), color='red', alpha=0.45 )
         for i,gamma in enumerate(g_tab) :
-            line = ax.plot(ks_, errors_3[i][err_name+'s_Ja'+err_name_post][mean_name]/to_divide,':', color=color_g[i], alpha=0.6 if gamma!=1.9 else 0.9)
+            if to_divide!=1 :
+                func_plot(errors_3[u][err_name+'s_J'+a_s+err_name_post], ks_, label_VARP, ax=ax, a_max=to_divide, color='red')
+            else :
+                try :
+                    func_plot(errors_3[u][err_name+'s_J'+a_s+err_name_post], ks_, label_VARP, ax=ax, color='red')
+                except :
+                    figtemp = plt.figure()
+                    ax2 = figtemp.add_subplot()
+                    func_plot(errors_3[u][err_name+'s_J'+a_s+err_name_post], ks_, label_VARP, axes=[ax,ax2], color='red')
+                    plt.close(figtemp)
+            # line = ax.plot(ks_, errors_3[i][err_name+'s_J'+a_s+err_name_post][mean_name]/to_divide,'--', color=color_g[i], alpha=0.6 if gamma!=1.9 else 0.9, label=label_VARP)
             # if gamma in g_labels.keys() :
             #     line.set_label('Label via method')
         # gmma = 0
-        ax.plot(ks_, errors_3[u][err_name+'s_J'+err_name_post][mean_name]/to_divide,':', color='purple', alpha=0.9)
-        ax.plot([0],[0], ':', color='black', alpha=0.4, label='with DoE')
+        # ax.plot(ks_, errors_3[u][err_name+'s_J'+err_name_post][mean_name]/to_divide,':', color='purple', alpha=0.9)
+        # ax.plot([0],[0], ':', color='black', alpha=0.4, label='with DoE')
         ax.set_xlim(ks_.min(), ks_.max())
         ax.legend()
         ax.set_title(IM)
@@ -202,26 +234,28 @@ if __name__=="__main__" :
     fig.clf()
     ax = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax)
+    generic_err_fig(IM, ax, a_s='')
 
     ax.set_title(r'quadratic error $\mathcal{E}^{|\mathbf{z}^k,\mathbf{a}^k}$')
     ax.set_ylabel('')
 
 
     #2. quad PSA
-    IM = 'sa_5hz'
-    data = m_data(IM)
+    # IM = 'sa_5hz'
+    # data = m_data(IM)
 
     fig = plt.figure(2, figsize=(4.5, 3))
     fig.clf()
     ax2 = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax2)
+    generic_err_fig(IM, ax2, a_s='a')
 
     ax2.set_title(r'quadratic error $\mathcal{E}^{|\mathbf{z}^k,\mathbf{a}^k}$')
     ax2.set_ylabel('')
 
     uni_ylims(ax,ax2)
+    ax.grid(alpha=0.3)
+    ax2.grid(alpha=0.3)
 
 
     #3. Bias PGA
@@ -235,7 +269,7 @@ if __name__=="__main__" :
     fig.clf()
     ax = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax, 1, err_name='errors_L2_', err_name_post='', func_plot=plots_med_tube_L2U, mean_name='err_med', tube1_name=None, tube2_name='err_med_cond', to_divide=to_div)
+    generic_err_fig(IM, ax, 1, a_s='', err_name='errors_L2_', err_name_post='', func_plot=plots_med_tube_L2U, mean_name='err_med', tube1_name=None, tube2_name='err_med_cond', to_divide=to_div)
 
     ax.axhline(y=model_biais, color='black', linestyle='-', alpha=0.3, label='model bias')
     ax.set_title(r'square bias $\mathcal{B}^{|\mathbf{z}^k,\mathbf{a}^k}$')
@@ -243,17 +277,17 @@ if __name__=="__main__" :
     ax.set_ylabel('')
 
     #4. Bias PSA
-    IM = 'sa_5hz'
-    data = m_data(IM)
-    ref = m_ref(data, IM)
-    to_div = data.a_tab.max()-data.a_tab.min()
-    model_biais = simpson((ref.curve_MC_data_tabs[0]-ref.curve_MLE)**2, data.a_tab)/to_div
+    # IM = 'sa_5hz'
+    # data = m_data(IM)
+    # ref = m_ref(data, IM)
+    # to_div = data.a_tab.max()-data.a_tab.min()
+    # model_biais = simpson((ref.curve_MC_data_tabs[0]-ref.curve_MLE)**2, data.a_tab)/to_div
 
     fig = plt.figure(4, figsize=(4.5, 3))
     fig.clf()
     ax2 = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax2, 1, err_name='errors_L2_', err_name_post='', func_plot=plots_med_tube_L2U, mean_name='err_med', tube1_name=None, tube2_name='err_med_cond', to_divide=to_div)
+    generic_err_fig(IM, ax2, 1, a_s='a', err_name='errors_L2_', err_name_post='', func_plot=plots_med_tube_L2U, mean_name='err_med', tube1_name=None, tube2_name='err_med_cond', to_divide=to_div)
 
     ax2.axhline(y=model_biais, color='black', linestyle='-', alpha=0.3, label='model bias')
     ax2.set_title(r'square bias $\mathcal{B}^{|\mathbf{z}^k,\mathbf{a}^k}$')
@@ -261,6 +295,8 @@ if __name__=="__main__" :
     ax2.set_ylabel('')
 
     uni_ylims(ax,ax2)
+    ax.grid(alpha=0.3)
+    ax2.grid(alpha=0.3)
 
     #5. Width PGA
     IM = 'PGA'
@@ -270,85 +306,138 @@ if __name__=="__main__" :
     fig.clf()
     ax = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax, 2, err_name='variations_conf_', func_plot=plot_variations, mean_name='mean_conf_zone', tube1_name='quant1_conf_zone', tube2_name='quant2_conf_zone')
+    generic_err_fig(IM, ax, 2, a_s='', err_name='variations_conf_', func_plot=plot_variations, mean_name='mean_conf_zone', tube1_name='quant1_conf_zone', tube2_name='quant2_conf_zone')
 
     ax.set_title(r'square credibility width $\mathcal{W}^{|\mathbf{z}^k,\mathbf{a}^k}$')
     ax.set_ylabel('')
 
     #5. Width PGA
-    IM = 'sa_5hz'
-    data = m_data(IM)
+    # IM = 'sa_5hz'
+    # data = m_data(IM)
 
     fig = plt.figure(6, figsize=(4.5, 3))
     fig.clf()
     ax2 = fig.add_subplot(111)
 
-    generic_err_fig(IM, ax2, 2, err_name='variations_conf_', func_plot=plot_variations, mean_name='mean_conf_zone', tube1_name='quant1_conf_zone', tube2_name='quant2_conf_zone')
+    generic_err_fig(IM, ax2, 2, a_s='a', err_name='variations_conf_', func_plot=plot_variations, mean_name='mean_conf_zone', tube1_name='quant1_conf_zone', tube2_name='quant2_conf_zone')
 
     ax2.set_title(r'square credibility width $\mathcal{W}^{|\mathbf{z}^k,\mathbf{a}^k}$')
     ax2.set_ylabel('')
 
     uni_ylims(ax,ax2)
-
-    ##
-
-    def degen_prob(IM, ax) :
-        # IM = 'PGA'
-
-        n_fold = 41 if IM=='PGA' else 42
-
-        folds_son = lambda g : 'M-G{}-ASG_SUR_bin_{}-(1-26)_{}'.format(g, IM, n_fold)
-
-        u = 0 # which take as n_s_J
-
-        color_g = ['purple'] + ['red']*8 + ['orange']
-        g_labels = {0:r'$\gamma=0$', 1.9:r'$\gamma=1.9$'}
-
-        # 1: plot l'err quadra: tout les gamma
-        g_tab = (np.arange(10)*2+1)/10
-        errors_3 = []
-        for i,gamma in enumerate(g_tab) :
-            errors_3.append(pickle.load(open(os.path.join(path_saved_runs, folds_son(gamma), 'errors_new_newL2_{}'.format(5)), 'rb')))
-
-        plot_proba_degen(errors_3[u]['degen_n_J'], 'standard', ax=ax, color='blue')
-        krange = np.arange(1, errors_3[-1]['degen_n_J'].shape[0]+1)
+    ax.grid(alpha=0.3)
+    ax2.grid(alpha=0.3)
 
 
-        for i,gamma in enumerate(g_tab) :
-            if i>0 :
-                ax.plot(krange, errors_3[i]['degen_s_Ja'],':', color=color_g[i], alpha=0.6 if gamma not in [0.1,1.9] else 1)
-            # if gamma in g_labels.keys() :
-            #     line.set_label('Label via method')
-        # # gmma = 0.1
-        gamma,i = 0.1,0
-        ax.plot(krange, errors_3[i]['degen_s_Ja'],':', color=color_g[i], alpha=0.6 if gamma not in [0.1,1.9] else 0.9)
-        # ax.plot(ks_, errors_3[u][err_name+'s_J'+err_name_post][mean_name]/to_divide,':', color='purple', alpha=0.9)
-        ax.plot([0],[0], ':', color='black', alpha=0.4, label='with DoE')
-        ax.set_xlim(krange.min(), krange.max())
-        ax.set_ylim(0,1)
-
-        ax.set_xlabel(r'Number of observations $k$')
-        ax.legend()
-        return ax
 
 
-    # PGA
-    IM='PGA'
+    #4. q-Bias PGA
+    IM = 'PGA'
+    data = m_data(IM)
+    ref = m_ref(data, IM)
+    to_div = data.a_tab.max()-data.a_tab.min()
+    model_biais = simpson((ref.curve_MC_data_tabs[0]-ref.curve_MLE)**2, data.a_tab)/to_div
+
     fig = plt.figure(7, figsize=(4.5, 3))
     fig.clf()
     ax = fig.add_subplot(111)
-    degen_prob(IM,ax)
-    ax.set_title('Degeneracy probability with PGA')
-    ax.grid(alpha=0.3)
 
-    #PSA
-    IM='sa_5hz'
+    generic_err_fig(IM, ax, 9, a_s='', err_name='quantsup_', err_name_post='', func_plot=plots_med_q2, mean_name='err_q1', tube1_name=None, tube2_name='err_cond_q1', to_divide=to_div)
+
+    ax.axhline(y=model_biais, color='black', linestyle='-', alpha=0.3, label='model bias')
+    ax.set_title(r'q bias')
+    ax.legend()
+    ax.set_ylabel('')
+
+    #4. q-Bias PSA
+    # IM = 'sa_5hz'
+    # data = m_data(IM)
+    # ref = m_ref(data, IM)
+    # to_div = data.a_tab.max()-data.a_tab.min()
+    # model_biais = simpson((ref.curve_MC_data_tabs[0]-ref.curve_MLE)**2, data.a_tab)/to_div
+
     fig = plt.figure(8, figsize=(4.5, 3))
     fig.clf()
-    ax = fig.add_subplot(111)
-    degen_prob(IM,ax)
-    ax.set_title('Degeneracy probability with PSA')
+    ax2 = fig.add_subplot(111)
+
+    generic_err_fig(IM, ax2, 9, a_s='a', err_name='quantsup_', err_name_post='', func_plot=plots_med_q2, mean_name='err_q1', tube1_name=None, tube2_name='err_cond_q1', to_divide=to_div)
+    #generic_err_fig(IM, ax2, 1, a_s='a', err_name='errors_L2_', err_name_post='', func_plot=plots_med_tube_L2U, mean_name='err_med', tube1_name=None, tube2_name='err_med_cond', to_divide=to_div)
+
+    ax2.axhline(y=model_biais, color='black', linestyle='-', alpha=0.3, label='model bias')
+    ax2.set_title(r'q bias')
+    ax2.legend()
+    ax2.set_ylabel('')
+
+    uni_ylims(ax,ax2)
     ax.grid(alpha=0.3)
+    ax2.grid(alpha=0.3)
+
+
+
+
+
+
+
+
+    # ##
+    #
+    # def degen_prob(IM, ax) :
+    #     # IM = 'PGA'
+    #
+    #     n_fold = 41 if IM=='PGA' else 42
+    #
+    #     folds_son = lambda g : 'M-G{}-ASG_SUR_bin_{}-(1-26)_{}'.format(g, IM, n_fold)
+    #
+    #     u = 0 # which take as n_s_J
+    #
+    #     color_g = ['purple'] + ['red']*8 + ['orange']
+    #     g_labels = {0:r'$\gamma=0$', 1.9:r'$\gamma=1.9$'}
+    #
+    #     # 1: plot l'err quadra: tout les gamma
+    #     g_tab = (np.arange(10)*2+1)/10
+    #     errors_3 = []
+    #     for i,gamma in enumerate(g_tab) :
+    #         errors_3.append(pickle.load(open(os.path.join(path_saved_runs, folds_son(gamma), 'errors_new_newL2_{}'.format(5)), 'rb')))
+    #
+    #     plot_proba_degen(errors_3[u]['degen_n_J'], 'standard', ax=ax, color='blue')
+    #     krange = np.arange(1, errors_3[-1]['degen_n_J'].shape[0]+1)
+    #
+    #
+    #     for i,gamma in enumerate(g_tab) :
+    #         if i>0 :
+    #             ax.plot(krange, errors_3[i]['degen_s_Ja'],':', color=color_g[i], alpha=0.6 if gamma not in [0.1,1.9] else 1)
+    #         # if gamma in g_labels.keys() :
+    #         #     line.set_label('Label via method')
+    #     # # gmma = 0.1
+    #     gamma,i = 0.1,0
+    #     ax.plot(krange, errors_3[i]['degen_s_Ja'],':', color=color_g[i], alpha=0.6 if gamma not in [0.1,1.9] else 0.9)
+    #     # ax.plot(ks_, errors_3[u][err_name+'s_J'+err_name_post][mean_name]/to_divide,':', color='purple', alpha=0.9)
+    #     ax.plot([0],[0], ':', color='black', alpha=0.4, label='with DoE')
+    #     ax.set_xlim(krange.min(), krange.max())
+    #     ax.set_ylim(0,1)
+    #
+    #     ax.set_xlabel(r'Number of observations $k$')
+    #     ax.legend()
+    #     return ax
+    #
+    #
+    # # PGA
+    # IM='PGA'
+    # fig = plt.figure(7, figsize=(4.5, 3))
+    # fig.clf()
+    # ax = fig.add_subplot(111)
+    # degen_prob(IM,ax)
+    # ax.set_title('Degeneracy probability with PGA')
+    # ax.grid(alpha=0.3)
+    #
+    # #PSA
+    # IM='sa_5hz'
+    # fig = plt.figure(8, figsize=(4.5, 3))
+    # fig.clf()
+    # ax = fig.add_subplot(111)
+    # degen_prob(IM,ax)
+    # ax.set_title('Degeneracy probability with PSA')
+    # ax.grid(alpha=0.3)
 
 
 
