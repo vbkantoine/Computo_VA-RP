@@ -9,8 +9,12 @@ _extensions/
 /.joblib
 /_extensions/
 *.DS_Store
+*.pyc
 
 # Latex compilation files:
 *.aux
 *.log
 *.toc
+*.pyc
+*.pyc
+/bayes_frag/__pycache__

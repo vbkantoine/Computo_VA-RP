@@ -77,7 +77,7 @@ varp_probit_path = os.path.join(probit_path, "Multiseed_VARP")
 # If False, all computations will be done and saved (and possibly overwrite the data files !)
 
 
-load_results_Probit_nocstr = True
+load_results_Probit_nocstr = False
 load_results_Probit_cstr = False
 
 
@@ -133,13 +133,13 @@ file_path = os.path.join(path_plot, name_file)
 seed_all(0)
 sqrt2 = np.sqrt(2)
 act_bet = lambda x: torch.log(1- 0.5*(1+torch.erf(x/sqrt2)) )
-NN = NetProbitSeparate(input_size, m1=0, s1=0.1, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
+NN = NetProbitSeparate(input_size, m1=0, s1=0.5, b1=0, pre_act=[nn.Identity(), act_bet], act1=[torch.exp, torch.exp])
 # NN = DifferentActivations(NN, [torch.exp, nn.Softplus()])
 # NN = AffineTransformation(NN, low, upp)
 VA = VA_NeuralNet(neural_net=NN, model=Probit)
 #print(f'Number of parameters : {VA.nb_param}')
 Div = DivMetric_NeuralNet(va=VA, T=T, use_alpha=True, alpha=alpha, use_log_lik=True)
-Div.penalize_norm_param=0.1
+Div.penalize_norm_param=0
 Div.save_params = True
 
 with torch.no_grad():
@@ -151,7 +151,7 @@ with torch.no_grad():
     MI_list = remove_nan_and_inf(MI_list)
     MI_current = np.mean(MI_list)
 
-num_epochs = 2000
+num_epochs = 1000
 loss_fct = "LB_MI"
 optimizer = torch_Adam
 num_samples_MI = 10
@@ -290,7 +290,7 @@ We perceive high mutual information values at the initialization, which we inter
 kappa = 0.15
 K_val = np.nanmean((theta_sample_prior[:,1]**kappa)**(1/alpha))
 c_val = np.nanmean((theta_sample_prior[:,1]**kappa)**(1+1/alpha))
-constr_val = 0.839594841003418
+constr_val = 0.825
 alpha_constr = np.mean((theta_sample_prior[:,0]**-kappa + 1)**-1)
 print(f'Constraint value estimation : {K_val/c_val}')  # = 0.839594841003418 
 
@@ -338,7 +338,7 @@ Constr.save_params = True
 with torch.no_grad():
     theta_sample_init = Div.va.implicit_prior_sampler(n_samples_prior).numpy()
 
-num_epochs = 400
+num_epochs = 5000
 optimizer = torch_Adam
 num_samples_MI = 10
 freq_MI = 10
@@ -353,7 +353,7 @@ if not load_results_Probit_cstr :
                                                             freq_MI, save_best_param, learning_rate, 
                                                             num_samples_grad=40,
                                                             momentum=True,
-                                                            freq_augm=freq_augm, max_violation=0.005, update_eta_augm=2.)
+                                                            freq_augm=freq_augm, max_violation=1, update_eta_augm=2.)
 
     constr_values = torch.stack(constr_values).numpy()
     all_params = torch.cat([param.view(-1) for param in NN_cst.parameters()])
@@ -375,7 +375,7 @@ if not load_results_Probit_cstr :
     D = X.unsqueeze(1)
     Probit.data = D
     n_samples_post = 5000
-    T_mcmc = 5*10**4 + 1 
+    T_mcmc = 10**5 + 1 
     sigma2_0 = torch.tensor(1.)
     eps_0 = torch.randn(p)
     eps_MH, batch_acc = VA.MH_posterior(eps_0, T_mcmc, sigma2_0, target_accept=0.4, adap=True, Cov=True, disable_tqdm=False)

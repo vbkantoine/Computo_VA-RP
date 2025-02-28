@@ -7,6 +7,8 @@ import os
 # gamma = os.environ['GAMMA']
 import sys
 
+
+
 try :
     N = int(sys.argv[1])
     gamma = float(sys.argv[2])/10
@@ -36,7 +38,7 @@ import inspect
 directory = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0])) # get script's path
 # os.chdir(directory)
 ch_directory = os.path.join(directory, r'./../')
-os.chdir(ch_directory)
+# os.chdir(ch_directory)
 
 sys.path.append(ch_directory)
 sys.path.append(directory)
@@ -53,7 +55,7 @@ from bayes_frag import config
 path = r''
 
 num_mean = 10
-
+num_models = [3,30,31,32,33,34,35,36,37,38]
 
 # # # mod and configs:
 """
@@ -150,16 +152,16 @@ transfo_i = lambda i: i
 
 """
     4 modeles :
-        "model_noSUR_J_{}" :      points generes aleatoirement, prior=J
-        "model_noSUR_J_adpt_{}" : points generes aleatoirement, prior=J_adap
-        "model_SUR_adpt_{}" :     points generes par SUR,       prior=J_adap
-        "model_SUR_origJ_{}" :    points du SUR et J_a, cfrag par prior=J
+        "model_noSUR_J_{}" :            points generes aleatoirement, prior=J
+        "model_noSUR_J_adpt_{}" :       points generes aleatoirement, prior=J_gamma
+        "model_noSUR_VARP_adpt_{}" :    points generes aleatoirement, prior=VARP_constrained
+        "model_noSUR_VARP_{}" :         points generes aleatoirement, prior=VARP
 """
 
 disable_tqdm=True
 
-save_parent = r'/mnt/beegfs/workdir/antoine.van-biesbroeck/results_SUR_bin_alpha_impact/'
-save_child = r'M-G{}-{}_SUR_bin_{}-(1-26)_{}'.format(gamma, mod_name, IM, num_run)
+save_parent = directory
+save_child = 'run_AJ'
 path = os.path.join(save_parent, save_child)
 assert os.path.exists(path), "path donnot exist {}".format(path)
 
@@ -169,13 +171,13 @@ for k in tqdm(range(num_mean), disable=disable_tqdm) :
     # f_J = open(os.path.join(file_paths, "exec_probits_task_{}_r1/model_bin_J".format(k+1)), 'rb')
     # f_J = open(os.path.join(file_paths, "2022-01-12-est_ASG", "exec_probits_task_ASG_{}_r1/model_bin_J".format(k+1)), 'rb')
     #try :
-    KK = k+1
+    KK = num_models[k]
     while KK<=400 :
         try :
             f_n_J = open(os.path.join(path, "model_noSUR_J_{}".format(KK)), 'rb')
             f_n_Ja = open(os.path.join(path, "model_noSUR_J_adpt_{}".format(KK)), 'rb')
-            f_s_Ja = open(os.path.join(path, "model_SUR_adpt_{}".format(KK)), 'rb')
-            f_s_J = open(os.path.join(path, "model_SUR_origJ_{}".format(KK)), 'rb')
+            f_s_Ja = open(os.path.join(path, "model_noSUR_VARP_adpt_{}".format(KK)), 'rb')
+            f_s_J = open(os.path.join(path, "model_noSUR_VARP_{}".format(KK)), 'rb')
         except :
             KK += 100
         else :
@@ -232,7 +234,9 @@ print(np.array(theta_n_J).shape)
 theta_n_J = np.transpose(np.array(theta_n_J)[to_keep], axes=[1,0,2,3])
 theta_n_Ja = np.transpose(np.array(theta_n_Ja)[to_keep], axes=[1,0,2,3])
 theta_s_Ja = np.transpose(np.array(theta_s_Ja)[to_keep], axes=[1,0,2,3])
+theta_s_Ja[:,:,1][theta_s_Ja[:,:,1]>2] = 2
 theta_s_J = np.transpose(np.array(theta_s_J)[to_keep], axes=[1,0,2,3])
+theta_s_J[:,:,1][theta_s_J[:,:,1]>2] = 2
 A_n_J = np.array(A_n_J).squeeze()[to_keep]
 # A_n_Ja = np.array(A_n_Ja).squeeze()
 # A_s_Ja = np.array(A_s_Ja).squeeze()
@@ -316,6 +320,35 @@ def errors_L2A(theta, ks_, a_tab=data.a_tab, f_A_tab=data.f_A_tab, ref_curve=ref
 
 def errors(theta, ks_, a_tab=data.a_tab, ref_curve=ref_curve, conf=0.05, transfo_i=lambda x:x):
     return errors_L2A(theta, ks_, a_tab, np.ones_like(a_tab), ref_curve, conf, transfo_i)
+
+
+def errors_q(theta, ks_, a_tab=data.a_tab, ref_curve=ref_curve, conf=0.05, transfo_i=lambda x:x):
+    f_A_tab = np.ones_like(a_tab)
+    # return errors_L2A(theta, ks_, a_tab, np.ones_like(a_tab), ref_curve, conf, transfo_i)
+    curves_post = np.zeros((len(ks_), len(a_tab), num_mean, n_est))
+    # err_conf_cond = np.zeros((len(ks_), num_mean))
+    err_med_cond_q1 = np.zeros((len(ks_), num_mean))
+    err_med_cond_q2 = np.zeros((len(ks_), num_mean))
+    for i,k in enumerate(ks_) :
+        # print(i)
+        idi = transfo_i(i)
+
+        for n in range(num_mean):
+            curves_post = 1/2 + 1/2*spc.erf(np.log(a_tab[...,np.newaxis]/theta[i,n,np.newaxis,:,0])/theta[i,n,np.newaxis,:,1])
+            # curves_post = curve_3var(a_tab, theta[idi,n]).T
+            # err_conf_cond[i,n] = simpson((np.quantile(curves_post, 1-conf/2, axis=-1)- np.quantile(curves_post, conf/2, axis=-1))**2* f_A_tab, a_tab)
+            err_med_cond_q1[i,n] = simpson((np.quantile(curves_post, 1-0.05/2, axis=-1)-ref_curve)**2* f_A_tab, a_tab)
+            err_med_cond_q2[i,n] = simpson((np.quantile(curves_post, 0.05/2, axis=-1)-ref_curve)**2* f_A_tab, a_tab)
+
+    # err_conf_q1 err_conf_cond_q1.mean(-1)
+    err_med_q1 = err_med_cond_q1.mean(-1)
+    err_med_q2 = err_med_cond_q2.mean(-1)
+
+    return {'err_q1':err_med_q1, 'err_q2':err_med_q2}
+
+
+
+
 
 
 
@@ -683,7 +716,11 @@ def task_8() :
     err_dict['Pfmeds_s_J'] = Pfmeds(theta_s_J)
     err_dict['Pfmeds_s_Ja'] = Pfmeds(theta_s_Ja)
 
-
+def task_9() :
+    err_dict['quantsup_n_J'] = errors_q(theta_n_J, ks_, transfo_i=transfo_i)
+    err_dict['quantsup_n_Ja'] = errors_q(theta_n_Ja, ks_, transfo_i=transfo_i)
+    err_dict['quantsup_s_J'] = errors_q(theta_s_J, ks_, transfo_i=transfo_i)
+    err_dict['quantsup_s_Ja'] = errors_q(theta_s_Ja, ks_, transfo_i=transfo_i)
 
 
 
@@ -702,6 +739,8 @@ if int(N)==5 : #two tasks for 5
 if int(N)==5 :
     task_7()
     task_8()
+if int(N)==9 :
+    task_9()
 
 
 # task_4()

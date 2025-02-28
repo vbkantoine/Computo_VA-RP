@@ -268,6 +268,7 @@ class Constraints_NeuralNet():
 
 
     def Augm_update_SGD(self, eta, max_violation, update_eta_augm, sup_eta_augm=torch.tensor(10**4)):
+        # max_viol = contrainte respectée -> sinon on multiplie par update_eta_augm, sinon on le divise
         fct_constr = self.fct_constraint()
         for k in range(self.K):
             for l in range(self.q):
