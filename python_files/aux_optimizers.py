@@ -29,6 +29,13 @@ def delete_infs(tensor) :
     mask = torch.isfinite(tensor)
     return tensor[mask]
 
+def delete_nans(tensor) :
+    mask = torch.isnan(tensor)
+    return tensor[~mask]
+
+def delete_infs_and_nans(tensor) :
+    return delete_nans(delete_infs(tensor))
+
 def assign_parameters_to_NN(NN, all_params):
     start_idx = 0
     for param in NN.parameters():

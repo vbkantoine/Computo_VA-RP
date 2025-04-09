@@ -747,7 +747,7 @@ class torch_ProbitModel():               # theta = (alpha,beta) in (R+*)^2 or th
             alpha, beta = theta[0], theta[1]
         else :
             alpha, beta = theta, self.set_beta
-        Phi = self.Gauss_cdf(torch.log(a/alpha) / beta)
+        Phi = torch.clamp(self.Gauss_cdf(torch.log(a/alpha) / beta), min=1e-4, max=1-1e-4)
         #lik_lognormal = torch.prod(torch.exp(-0.5*(torch.log(a) - self.mu_a)**2 / self.sigma2_a) / (a*torch.sqrt(torch.tensor(2*math.pi*self.sigma2_a))), dim=0) 
         lik_cond = torch.prod(Phi**Z * (1-Phi)**(1-Z), dim=0)
         lik_1D = lik_cond #* lik_lognormal  

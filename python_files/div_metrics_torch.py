@@ -146,7 +146,7 @@ class DivMetric_NeuralNet():
         else:
             sommand = gradient_log_lik * f_final(ratio_lik).unsqueeze(1) 
             grad_tensor = torch.reshape(grad_tensor, (va.nb_param,va.q))
-            return torch.sum(torch.mean(sommand, dim=0) * grad_tensor, dim=1)
+            return torch.nansum(torch.nanmean(sommand, dim=0) * grad_tensor, dim=1)
 
     def LB_MI(self, theta, J, N):
         """ Estimates by Monte-Carlo the inner expectancy in the lower bound

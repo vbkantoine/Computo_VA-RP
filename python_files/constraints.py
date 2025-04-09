@@ -190,8 +190,9 @@ class Constraints_NeuralNet():
                 raise ValueError(f'Number of constraints and number of penality parameters are not compatible : {self.K} and {int((self.eta_augm).size(0))}')
         self.rule = rule  # Update rule on Lagrange multipliers and penality parameters : 'SGD' or 'RMS' 
         self.penalize_norm_param = 0
-        self.keep_params = False
-        self.save_params = {}
+        self.keep_params = {}
+        self.save_params = False
+        self.save_during_trainig = None
 
     def check_implicit_constraints(self):  # relevant only if K > 1
         K = self.K
@@ -213,9 +214,9 @@ class Constraints_NeuralNet():
         for k in range(self.K):
             for l in range(self.q):
                 if self.moment == 'raw':
-                    A = torch.nanmean(delete_infs(theta_sample[:,l])**self.betas[k])
+                    A = torch.nanmean(delete_infs_and_nans(theta_sample[:,l])**self.betas[k])
                 else :
-                    A = torch.nanmean((delete_infs(theta_sample[:,l])**self.betas[k] + delete_infs(theta_sample[:,l])**self.taus[k])**-1)
+                    A = torch.nanmean((delete_infs_and_nans(theta_sample[:,l])**self.betas[k] + delete_infs(theta_sample[:,l])**self.taus[k])**-1)
                 result[k,l] = A - self.b[k,l] 
         # print(result)
         return result
@@ -243,7 +244,7 @@ class Constraints_NeuralNet():
         betas = self.betas    # grad of constraint term computed with one sample
         taus = self.taus
         va = self.va
-        grad_obj = self.grad_obj(theta, J, N, grad_tensor)
+        grad_obj = torch.clamp(self.grad_obj(theta, J, N, grad_tensor), min=-1e5, max=1e5)
         fct_constr = self.fct_constraint()
         assert not (torch.isnan(fct_constr).any() or torch.isinf(fct_constr).any())
         constr_term = torch.zeros(self.K, va.q)
@@ -259,15 +260,21 @@ class Constraints_NeuralNet():
                         constr_term[k,l] = betas[k]*theta[l]**(betas[k]-1) * (eta[k,l]-self.eta_augm[k,l]*fct_constr[k,l])
                     else : 
                         constr_term[k,l] = aux_grad_moment(theta[l],betas[k],taus[k]) * (eta[k,l]-self.eta_augm[k,l]*fct_constr[k,l])
-        sum_constr = torch.nansum(delete_infs(constr_term), dim=0)
+        sum_constr = torch.nansum(delete_infs_and_nans(constr_term), dim=0)
+        assert not torch.isnan(constr_term).any()
+        assert not torch.isinf(sum_constr).any(), 'constr_term_has_nan:{}'.format(torch.isnan(constr_term).any())
         if va.q == 1 : 
             return grad_obj + sum_constr * grad_tensor
         else:
             grad_tensor = torch.reshape(grad_tensor, (va.nb_param,va.q))
-            return grad_obj + torch.nansum(sum_constr.unsqueeze(0) * grad_tensor, dim=1)
+            assert not torch.isinf(grad_tensor).any()
+            assert not torch.isinf(grad_obj).any()
+            assert not torch.isnan(grad_obj).any()
+            # assert not torch.isinf(torch.nansum(sum_constr.unsqueeze(0) * grad_tensor, dim=1)).any()
+            return grad_obj + torch.clamp(torch.nansum(sum_constr.unsqueeze(0) * grad_tensor, dim=1), min=-1e5, max=1e5)
 
 
-    def Augm_update_SGD(self, eta, max_violation, update_eta_augm, sup_eta_augm=torch.tensor(10**4)):
+    def Augm_update_SGD(self, eta, max_violation, update_eta_augm, sup_eta_augm=torch.tensor(10**4), inf_eta_augm=torch.tensor(10**-4)):
         # max_viol = contrainte respectée -> sinon on multiplie par update_eta_augm, sinon on le divise
         fct_constr = self.fct_constraint()
         for k in range(self.K):
@@ -276,9 +283,9 @@ class Constraints_NeuralNet():
         for k in range(self.K):
             for l in range(self.q):
                 if torch.max(torch.abs(fct_constr)) > max_violation :
-                        self.eta_augm[k,l] = torch.minimum(self.eta_augm[k,l] * update_eta_augm, sup_eta_augm)
+                        self.eta_augm[k,l] = torch.clip(self.eta_augm[k,l] * update_eta_augm, max=sup_eta_augm, min=inf_eta_augm)
                 else :
-                    self.eta_augm[k,l] = torch.minimum(self.eta_augm[k,l] / update_eta_augm, sup_eta_augm)
+                    self.eta_augm[k,l] = torch.clip(self.eta_augm[k,l] / update_eta_augm, max=sup_eta_augm, min=inf_eta_augm)
         return eta
 
     def Augm_update_RMS(self, eta, var_augm, gamma=0.01, beta=0.99, epsilon=1e-8):
@@ -347,10 +354,13 @@ class Constraints_NeuralNet():
                         net.zero_grad()
                         pseudo_loss[i].backward(retain_graph=True)
                         all_grads.extend([param.grad.view(-1) for param in net.parameters() if param.grad is not None])
-                    all_grads_tensor = torch.cat(all_grads)
+                    all_grads_tensor = torch.clamp(torch.cat(all_grads), min=-1e5, max=1e5)
+                    # print('all_grads has nan?', torch.isnan(all_grads_tensor).any())
                 with torch.no_grad():
+                    assert not torch.isinf(all_grads_tensor).any()
+                    assert not torch.isnan(all_grads_tensor).any()
                     one_grad = - self.grad_Lagrangian(theta_output, J, N, eta, all_grads_tensor)
-                    assert not (torch.isnan(one_grad).any() or torch.isinf(one_grad).any())
+                    assert not (torch.isnan(one_grad).any() or torch.isinf(one_grad).any()), 'has_nan:{}'.format(torch.isnan(one_grad).any()) + 'has_infs:{}'.format(torch.isinf(one_grad).any())
                     if self.lag_method == 'augmented' :
                         # Update periodically Lagrange multipliers and penality parameters with the chosen rule
                         if (epoch+1) % freq_augm == 0 :
@@ -420,7 +430,11 @@ class Constraints_NeuralNet():
                         params['b1'].append(net.netalpaha.singl.fc1.bias.detach().numpy())
                         params['b2'].append(net.netbeta.singl.fc1.bias.detach().numpy())
 
-        self.keep_params = params
+                        self.keep_params = params
+
+
+                    self.save_during_trainig = (MI, constr_values, range_MI, lower_MI, upper_MI)
+
         if save_best_param and best_model_params is not None:
             net.load_state_dict(best_model_params)
         #print('Training done!')

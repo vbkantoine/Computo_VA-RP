@@ -18,3 +18,5 @@ _extensions/
 *.pyc
 *.pyc
 /bayes_frag/__pycache__
+/SUR_alpha_impact/run_AJ
+/run_AJ_new

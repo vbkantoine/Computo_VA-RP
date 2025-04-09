@@ -155,7 +155,8 @@ if __name__=="__main__" :
 
         n_fold = 41 if IM=='PGA' else 42
 
-        folds_son = lambda g : 'run_AJ'.format(g, IM, n_fold)
+        # folds_son = lambda g : 'run_AJ'.format(g, IM, n_fold)
+        folds_son = lambda g : r'./../run_AJ_new'
 
         u = 0 # which take as n_s_J
 
